@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luyện Tập Bài 21: Moment Lực & Cân Bằng Của Vật Rắn - Vật Lí 10</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            color: #0f172a;
+        }
+        /* Chuẩn hiển thị kí hiệu Toán - Vật lí & Vectơ */
+        .math {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+            font-weight: 600;
+            padding: 0 2px;
+        }
+        .math-num {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: normal;
+            font-weight: 600;
+        }
+        .vec {
+            position: relative;
+            display: inline-block;
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+            font-weight: 700;
+            padding-top: 2px;
+        }
+        .vec::after {
+            content: "→";
+            position: absolute;
+            top: -0.58em;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0.85);
+            font-size: 0.78em;
+            font-style: normal;
+            font-weight: bold;
+            line-height: 1;
+        }
+        /* Hiệu ứng nút đáp án */
+        .option-btn {
+            transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px -3px rgba(37, 99, 235, 0.15);
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .option-btn:active:not(:disabled) {
+            transform: scale(0.99);
+        }
+        /* Hiệu ứng rung khi chọn sai */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .shake-anim {
+            animation: shake 0.4s ease-in-out;
+        }
+        /* Hiệu ứng nảy khi chọn đúng */
+        @keyframes popSuccess {
+            0% { transform: scale(0.96); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        .pop-anim {
+            animation: popSuccess 0.35s ease-out;
+        }
+        /* Canvas pháo hoa */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-20">
+    <!-- Canvas hiệu ứng pháo hoa khi hoàn thành xuất sắc -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Toast Thông báo phản hồi vui nhộn -->
+    <div id="fun-toast" class="fixed bottom-5 right-5 z-50 hidden max-w-sm transition-all duration-300 transform translate-y-2 opacity-0">
+        <div id="fun-toast-inner" class="flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl border-2 text-white font-bold text-sm md:text-base">
+            <span id="fun-toast-icon" class="text-2xl">🎯</span>
+            <span id="fun-toast-text">Đỉnh của chóp!</span>
+        </div>
+    </div>
+
+    <!-- Header cố định -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-5xl mx-auto px-3 sm:px-6 py-3">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <!-- Tiêu đề bài học -->
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-md shrink-0">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">Vật Lí 10 • Chương III</span>
+                        <h1 class="text-base sm:text-lg font-extrabold text-slate-900 leading-tight">Bài 21: Moment lực. Cân bằng của vật rắn</h1>
+                    </div>
+                </div>
+
+                <!-- Cụm nút điều khiển: Âm thanh, Đảo đề, Giáo viên -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <button id="sound-toggle-btn" onclick="toggleSound()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs sm:text-sm bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200 transition shadow-sm">
+                        <span id="sound-icon">🔊</span>
+                        <span id="sound-text">Âm thanh: BẬT</span>
+                    </button>
+
+                    <button onclick="testFunnySound()" title="Nghe thử hiệu ứng âm thanh vui nhộn" class="px-2.5 py-2 rounded-xl font-semibold text-xs bg-purple-100 text-purple-800 border border-purple-200 hover:bg-purple-200 transition">
+                        🎵 Thử nhạc
+                    </button>
+
+                    <button onclick="restartCurrentLevel()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs sm:text-sm bg-blue-600 text-white hover:bg-blue-700 transition shadow-sm">
+                        <span>🔀</span>
+                        <span>Đảo đề & Làm lại</span>
+                    </button>
+
+                    <button id="teacher-mode-btn" onclick="toggleTeacherMode()" class="px-2.5 py-2 rounded-xl font-semibold text-xs bg-slate-100 text-slate-600 border border-slate-300 hover:bg-slate-200 transition" title="Mở khóa nhanh tất cả các cấp độ để Giáo viên kiểm tra đề">
+                        👩‍🏫 GV Mở khóa
+                    </button>
+                </div>
+            </div>
+
+            <!-- Thanh Tiến Độ Mở Khóa 3 Lần Cấp Độ 1 -->
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-50/80 px-3 py-2 rounded-xl border">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-xs sm:text-sm font-bold text-slate-700">🎯 Nhiệm vụ mở khóa Cấp 2 & 3:</span>
+                    <span class="text-xs text-slate-600">Đạt <b>12/12 câu Cấp độ 1</b> đủ <b>3 lần</b>:</span>
+                    <div id="mastery-badges" class="flex items-center gap-1.5 ml-1">
+                        <!-- Render bằng JS -->
+                    </div>
+                </div>
+
+                <!-- Thống kê lượt làm hiện tại -->
+                <div class="flex items-center gap-3 text-xs sm:text-sm font-bold">
+                    <span class="text-slate-600">Đã làm: <strong id="stat-answered" class="text-blue-600">0/12</strong></span>
+                    <span class="text-slate-300">|</span>
+                    <span class="text-slate-600">Đúng: <strong id="stat-correct" class="text-emerald-600">0</strong></span>
+                    <span class="text-slate-300">|</span>
+                    <span class="text-slate-600">Điểm cấp độ: <strong id="stat-score" class="text-indigo-600">0%</strong></span>
+                </div>
+            </div>
+
+            <!-- Tabs Chọn Cấp Độ -->
+            <div class="grid grid-cols-3 gap-2 mt-3">
+                <button id="tab-level-1" onclick="selectLevel(1)" class="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2.5 px-2 rounded-xl font-bold text-xs sm:text-sm border-2 transition">
+                    <span>🌱 Cấp độ 1 (5-6đ)</span>
+                    <span class="px-2 py-0.5 text-[11px] rounded-full bg-blue-100 text-blue-800">12 câu</span>
+                </button>
+                <button id="tab-level-2" onclick="selectLevel(2)" class="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2.5 px-2 rounded-xl font-bold text-xs sm:text-sm border-2 transition">
+                    <span id="lock-icon-2">🔒</span>
+                    <span>⚡ Cấp độ 2 (7-8đ)</span>
+                    <span class="px-2 py-0.5 text-[11px] rounded-full bg-slate-200 text-slate-700">5 câu</span>
+                </button>
+                <button id="tab-level-3" onclick="selectLevel(3)" class="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2.5 px-2 rounded-xl font-bold text-xs sm:text-sm border-2 transition">
+                    <span id="lock-icon-3">🔒</span>
+                    <span>🔥 Cấp độ 3 (9-10đ)</span>
+                    <span class="px-2 py-0.5 text-[11px] rounded-full bg-slate-200 text-slate-700">5 câu</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Nội dung chính -->
+    <main class="max-w-4xl mx-auto px-3 sm:px-6 pt-5">
+        <!-- Banner hướng dẫn theo cấp độ -->
+        <div id="level-banner" class="mb-5 p-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span id="banner-badge" class="px-2.5 py-0.5 text-xs font-extrabold uppercase bg-white/20 rounded-lg">Cấp độ 1 • Bắt buộc</span>
+                    <span id="banner-attempt-info" class="text-xs font-medium text-blue-100">Đề đã được đảo ngẫu nhiên</span>
+                </div>
+                <h2 id="banner-title" class="text-lg sm:text-xl font-extrabold mt-1">Nhận biết công thức, đơn vị & Tính toán 1 bước (12 câu)</h2>
+                <p id="banner-desc" class="text-xs sm:text-sm text-blue-100 mt-0.5">Tích chọn đáp án để xem kết quả ngay lập tức! Làm đúng cả 12/12 câu đủ 3 lần để mở khóa Cấp độ 2 và 3.</p>
+            </div>
+            <button onclick="resetAllProgress()" class="self-start sm:self-center shrink-0 text-xs bg-white/15 hover:bg-white/25 text-white px-3 py-1.5 rounded-lg border border-white/20 transition">
+                🗑️ Xóa tiến độ lưu
+            </button>
+        </div>
+
+        <!-- Thông báo khóa nếu học sinh bấm vào Cấp 2, 3 khi chưa đủ 3 lần 12/12 -->
+        <div id="locked-warning" class="hidden mb-5 p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 text-amber-900 shadow-sm flex items-start gap-3">
+            <span class="text-2xl">🔐</span>
+            <div class="text-sm">
+                <p class="font-extrabold text-amber-950">Chưa mở khóa Cấp độ này!</p>
+                <p class="mt-0.5">Em cần hoàn thành <b>Cấp độ 1 (12 câu)</b> và đạt <b>12/12 câu đúng đủ 3 lần</b> để nắm thật chắc công thức trước khi lên Cấp độ 2 & 3 nhé! (Hiện tại: <b id="locked-warning-count">0/3</b> lần).</p>
+            </div>
+        </div>
+
+        <!-- Hộp Tổng Kết Hoàn Thành Lượt Làm (Hiện ở đầu & cuối khi làm xong hết câu hỏi trong cấp độ) -->
+        <div id="level-summary-box" class="hidden mb-6 p-6 rounded-2xl bg-white border-2 border-indigo-500 shadow-lg text-center">
+            <!-- Nội dung tổng kết render động bằng JS -->
+        </div>
+
+        <!-- Danh sách câu hỏi -->
+        <div id="questions-container" class="space-y-6">
+            <!-- Các thẻ câu hỏi sẽ được render tại đây -->
+        </div>
+
+        <!-- Hộp Tổng Kết ở dưới cùng trang -->
+        <div id="level-summary-bottom" class="hidden mt-8 p-6 rounded-2xl bg-white border-2 border-indigo-500 shadow-lg text-center">
+        </div>
+    </main>
+
+    <script>
+        /********************************************************************
+         * 1. HỆ THỐNG ÂM THANH VUI NHỘN & BẤT NGỜ (WEB AUDIO API SYNTHESIZER)
+         ********************************************************************/
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    audioCtx = new AudioContextClass();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            const text = document.getElementById('sound-text');
+            const btn = document.getElementById('sound-toggle-btn');
+
+            if (soundEnabled) {
+                icon.textContent = '🔊';
+                text.textContent = 'Âm thanh: BẬT';
+                btn.className = 'flex items-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs sm:text-sm bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200 transition shadow-sm';
+                playSoundCorrect(0);
+            } else {
+                icon.textContent = '🔇';
+                text.textContent = 'Âm thanh: TẮT';
+                btn.className = 'flex items-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs sm:text-sm bg-slate-200 text-slate-600 border border-slate-300 hover:bg-slate-300 transition';
+            }
+        }
+
+        // Âm thanh ĐÚNG (3 kiểu vui nhộn, bất ngờ ngẫu nhiên)
+        function playSoundCorrect(forceVariant = null) {
+            if (!soundEnabled) return;
+            const ctx = getAudioContext();
+            if (!ctx) return;
+
+            const variant = forceVariant !== null ? forceVariant : Math.floor(Math.random() * 3);
+            const now = ctx.currentTime;
+
+            if (variant === 0) {
+                // Kiểu 1: Mario Coin + PowerUp lấp lánh
+                const notes = [987.77, 1318.51, 1567.98, 2093.00];
+                notes.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.065);
+                    gain.gain.setValueAtTime(0.22, now + idx * 0.065);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.065 + 0.22);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now + idx * 0.065);
+                    osc.stop(now + idx * 0.065 + 0.23);
+                });
+            } else if (variant === 1) {
+                // Kiểu 2: Kèn Fanfare Chiến Thắng ("Tè-tè-te-tè!")
+                const melody = [
+                    { f: 523.25, t: 0, d: 0.09 },
+                    { f: 659.25, t: 0.1, d: 0.09 },
+                    { f: 783.99, t: 0.2, d: 0.09 },
+                    { f: 1046.50, t: 0.3, d: 0.32 }
+                ];
+                melody.forEach(n => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(n.f, now + n.t);
+                    gain.gain.setValueAtTime(0.14, now + n.t);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + n.t + n.d);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now + n.t);
+                    osc.stop(now + n.t + n.d + 0.02);
+                });
+            } else {
+                // Kiểu 3: Tiếng Sáo Trượt Vui Nhộn ("Chiuuu-Bốp-Ting!")
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(1600, now + 0.18);
+                osc.frequency.setValueAtTime(1200, now + 0.19);
+                osc.frequency.exponentialRampToValueAtTime(2200, now + 0.35);
+
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            }
+        }
+
+        // Âm thanh SAI (3 kiểu hài hước, bất ngờ)
+        function playSoundWrong() {
+            if (!soundEnabled) return;
+            const ctx = getAudioContext();
+            if (!ctx) return;
+
+            const variant = Math.floor(Math.random() * 3);
+            const now = ctx.currentTime;
+
+            if (variant === 0) {
+                // Kiểu 1: Kèn buồn hài hước "Wah-Wah-Waaah"
+                const freqs = [392.00, 369.99, 349.23, 311.13];
+                freqs.forEach((f, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    const start = now + i * 0.14;
+                    const dur = i === 3 ? 0.35 : 0.12;
+                    osc.frequency.setValueAtTime(f, start);
+                    if (i === 3) {
+                        osc.frequency.linearRampToValueAtTime(270, start + dur);
+                    }
+                    gain.gain.setValueAtTime(0.14, start);
+                    gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(start);
+                    osc.stop(start + dur + 0.02);
+                });
+            } else if (variant === 1) {
+                // Kiểu 2: Tiếng lò xo trượt vỏ chuối "Boing-Oing-Oing"
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(160, now);
+                osc.frequency.exponentialRampToValueAtTime(580, now + 0.12);
+                osc.frequency.exponentialRampToValueAtTime(140, now + 0.25);
+                osc.frequency.exponentialRampToValueAtTime(420, now + 0.36);
+                osc.frequency.exponentialRampToValueAtTime(110, now + 0.5);
+
+                gain.gain.setValueAtTime(0.28, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.52);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.54);
+            } else {
+                // Kiểu 3: Chuông Báo Động Vui "Èn-Én"
+                [220, 175].forEach((f, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(f, now + idx * 0.16);
+                    gain.gain.setValueAtTime(0.15, now + idx * 0.16);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.16 + 0.14);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now + idx * 0.16);
+                    osc.stop(now + idx * 0.16 + 0.15);
+                });
+            }
+        }
+
+        // Âm thanh Qua Màn / Mở Khóa Cấp Độ
+        function playSoundLevelUp() {
+            if (!soundEnabled) return;
+            const ctx = getAudioContext();
+            if (!ctx) return;
+            const now = ctx.currentTime;
+            const notes = [523.25, 659.25, 783.99, 1046.50, 783.99, 1046.50, 1318.51];
+            const times = [0, 0.09, 0.18, 0.27, 0.40, 0.50, 0.62];
+            notes.forEach((f, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(f, now + times[i]);
+                gain.gain.setValueAtTime(0.24, now + times[i]);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + times[i] + 0.25);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now + times[i]);
+                osc.stop(now + times[i] + 0.26);
+            });
+        }
+
+        function testFunnySound() {
+            if (!soundEnabled) toggleSound();
+            playSoundCorrect();
+            showFunToast(true, "Âm thanh vui nhộn đã sẵn sàng! Chiến thôi nào! 🚀");
+        }
+
+        // Các câu cảm thán ngẫu nhiên khi Đúng / Sai
+        const funCorrectMessages = [
+            "Đỉnh của chóp! Chuẩn Vật Lí 100%! 🎯",
+            "Archimedes đang vỗ tay khen em đó! 👏",
+            "Quá nhanh quá nguy hiểm! Nhớ bài siêu đỉnh! ⚡",
+            "Tuyệt vời ông mặt trời! Cánh tay đòn chuẩn đét! 🌟",
+            "Xuất sắc! Moment lực không làm khó được em! 🏆",
+            "Một pha xử lí đi vào lòng đất vì quá chuẩn! 🔥"
+        ];
+
+        const funWrongMessages = [
+            "Ối dồi ôi! Nhầm công thức hoặc cánh tay đòn rồi! 😅",
+            "Khoan đã! Đọc kĩ lại giải thích chi tiết bên dưới nhé! 🛠️",
+            "Đòn bẩy hơi nghiêng rồi, cố gắng nhớ kĩ câu này nha! 💡",
+            "Suýt đúng! Đừng quên cánh tay đòn phải vuông góc với giá của lực! 📐",
+            "Bình tĩnh nào! Sai 1 lần để lần sau nhớ mãi không quên! 💪"
+        ];
+
+        let toastTimeout = null;
+        function showFunToast(isCorrect, customText = null) {
+            const toast = document.getElementById('fun-toast');
+            const inner = document.getElementById('fun-toast-inner');
+            const icon = document.getElementById('fun-toast-icon');
+            const text = document.getElementById('fun-toast-text');
+
+            const msg = customText || (isCorrect
+                ? funCorrectMessages[Math.floor(Math.random() * funCorrectMessages.length)]
+                : funWrongMessages[Math.floor(Math.random() * funWrongMessages.length)]);
+
+            icon.textContent = isCorrect ? '🎉' : '🤪';
+            text.textContent = msg;
+
+            if (isCorrect) {
+                inner.className = 'flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl border-2 bg-emerald-600 border-emerald-400 text-white font-bold text-sm md:text-base';
+            } else {
+                inner.className = 'flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl border-2 bg-rose-600 border-rose-400 text-white font-bold text-sm md:text-base';
+            }
+
+            toast.classList.remove('hidden', 'translate-y-2', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 2600);
+        }
+
+        /********************************************************************
+         * 2. NGÂN HÀNG 22 CÂU HỎI BÁM SÁT BÀI 21 + HÌNH VẼ SVG CHÍNH XÁC
+         ********************************************************************/
+        const QUESTION_BANK = [
+            // ================= CẤP ĐỘ 1: 12 CÂU (NHẬN BIẾT & TÍNH TOÁN 1 BƯỚC) =================
+            {
+                id: 'L1_01',
+                level: 1,
+                topic: 'Định nghĩa & Ý nghĩa vật lí',
+                question: 'Đại lượng vật lí đặc trưng cho tác dụng làm quay của một lực quanh một trục cố định được gọi là gì?',
+                svg: `<svg viewBox="0 0 380 140" class="w-full max-w-md mx-auto h-32">
+                    <defs>
+                        <marker id="arrRed1" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+                        </marker>
+                        <marker id="arrBlue1" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb"/>
+                        </marker>
+                    </defs>
+                    <!-- Bản lề & Cánh cửa nhìn từ trên xuống -->
+                    <rect x="35" y="25" width="12" height="90" rx="3" fill="#475569"/>
+                    <rect x="47" y="64" width="220" height="12" rx="4" fill="#93c5fd" stroke="#1d4ed8" stroke-width="2"/>
+                    <circle cx="47" cy="70" r="6" fill="#1e293b"/>
+                    <text x="32" y="19" font-size="13" font-weight="bold" fill="#1e293b">Trục quay O</text>
+                    <!-- Vector lực F -->
+                    <line x1="255" y1="70" x2="255" y2="125" stroke="#dc2626" stroke-width="3" marker-end="url(#arrRed1)"/>
+                    <text x="268" y="115" font-size="15" font-weight="bold" font-family="Times New Roman" font-style="italic" fill="#dc2626">F⃗</text>
+                    <!-- Cánh tay đòn d -->
+                    <line x1="47" y1="45" x2="255" y2="45" stroke="#2563eb" stroke-width="1.8" stroke-dasharray="4,3" marker-start="url(#arrBlue1)" marker-end="url(#arrBlue1)"/>
+                    <line x1="255" y1="40" x2="255" y2="70" stroke="#64748b" stroke-width="1.2" stroke-dasharray="3,3"/>
+                    <text x="145" y="38" font-size="15" font-weight="bold" font-family="Times New Roman" font-style="italic" fill="#1d4ed8">d</text>
+                    <!-- Chiều quay -->
+                    <path d="M 105 55 A 35 35 0 0 1 105 90" fill="none" stroke="#059669" stroke-width="2.2" marker-end="url(#arrBlue1)"/>
+                    <text x="115" y="95" font-size="12" font-weight="bold" fill="#059669">Tác dụng làm quay</text>
+                </svg>`,
+                options: [
+                    { text: 'Moment lực.', isCorrect: true },
+                    { text: 'Công cơ học của lực.', isCorrect: false },
+                    { text: 'Động lượng của vật.', isCorrect: false },
+                    { text: 'Cánh tay đòn của lực.', isCorrect: false }
+                ],
+                explanation: '<b>Moment lực</b> đối với một trục quay là đại lượng đặc trưng cho tác dụng làm quay của lực và được đo bằng tích của lực với cánh tay đòn của nó: <span class="math">M = F · d</span>.'
+            },
+            {
+                id: 'L1_02',
+                level: 1,
+                topic: 'Công thức Moment lực',
+                question: 'Gọi <span class="math">F</span> là độ lớn của lực tác dụng và <span class="math">d</span> là cánh tay đòn của lực đối với trục quay <span class="math">O</span>. Công thức tính độ lớn moment lực <span class="math">M</span> là:',
+                svg: `<svg viewBox="0 0 380 130" class="w-full max-w-md mx-auto h-32">
+                    <defs>
+                        <marker id="arrR2" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+                        </marker>
+                    </defs>
+                    <!-- Bu lông & Cờ lê -->
+                    <polygon points="70,50 85,58 85,74 70,82 55,74 55,58" fill="#cbd5e1" stroke="#334155" stroke-width="2"/>
+                    <rect x="82" y="59" width="190" height="14" rx="5" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>
+                    <circle cx="70" cy="66" r="4" fill="#dc2626"/>
+                    <text x="64" y="42" font-size="14" font-weight="bold" font-family="Times New Roman" font-style="italic" fill="#0f172a">O</text>
+                    <!-- Đường gióng cánh tay đòn d -->
+                    <line x1="70" y1="66" x2="70" y2="25" stroke="#64748b" stroke-dasharray="3,3"/>
+                    <line x1="260" y1="66" x2="260" y2="25" stroke="#64748b" stroke-dasharray="3,3"/>
+                    <line x1="70" y1="30" x2="260" y2="30" stroke="#2563eb" stroke-width="2"/>
+                    <text x="160" y="23" font-size="15" font-weight="bold" font-family="Times New Roman" font-style="italic" fill="#2563eb">d</text>
+                    <!-- Kí hiệu vuông góc -->
+                    <rect x="252" y="66" width="8" height="8" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+                    <!-- Lực F -->
+                    <line x1="260" y1="66" x2="260" y2="118" stroke="#dc2626" stroke-width="3" marker-end="url(#arrR2)"/>
+                    <text x="272" y="108" font-size="16" font-weight="bold" font-family="Times New Roman" font-style="italic" fill="#dc2626">F⃗</text>
+                </svg>`,
+                options: [
+                    { text: '<span class="math">M = F · d</span>', isCorrect: true },
+                    { text: '<span class="math">M = F / d</span>', isCorrect: false },
+                    { text: '<span class="math">M = d / F</span>', isCorrect: false },
+                    { text: '<span class="math">M = F · d</span><sup class="math-num">2</sup>', isCorrect: false }
+                ],
+                explanation: 'Theo định nghĩa SGK Vật lí 10 Bài 21: Độ lớn của moment lực bằng tích của độ lớn lực <span class="math">F</span> với cánh tay đòn <span class="math">d</span>: <b><span class="math">M = F · d</span></b>.'
+            },
+            {
+                id: 'L1_03',
+                level: 1,
+                topic: 'Đơn vị của Moment lực',
+                question: 'Trong hệ đơn vị SI, đơn vị đo của moment lực là gì?',
+                svg: `<svg viewBox="0 0 360 110" class="w-full max-w-md mx-auto h-28">
+                    <rect x="25" y="18" width="95" height="70" rx="10" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+                    <text x="72" y="45" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e40af">Lực F</text>
+                    <text x="72" y="70" text-anchor="middle" font-size="16" font-weight="bold" fill="#1e3a8a">Newton (N)</text>
+                    <text x="140" y="60" text-anchor="middle" font-size="24" font-weight="bold" fill="#475569">×</text>
+                    <rect x="160" y="18" width="95" height="70" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+                    <text x="207" y="45" text-anchor="middle" font-size="13" font-weight="bold" fill="#166534">Cánh tay đòn d</text>
+                    <text x="207" y="70" text-anchor="middle" font-size="16" font-weight="bold" fill="#14532d">Mét (m)</text>
+                    <text x="275" y="60" text-anchor="middle" font-size="24" font-weight="bold" fill="#475569">=</text>
+                    <circle cx="318" cy="53" r="28" fill="#fef3c7" stroke="#d97706" stroke-width="2.5"/>
+                    <text x="318" y="60" text-anchor="middle" font-size="22" font-weight="bold" fill="#b45309">?</text>
+                </svg>`,
+                options: [
+                    { text: 'Newton nhân mét (<span class="math-num">N·m</span>).', isCorrect: true },
+                    { text: 'Newton trên mét (<span class="math-num">N/m</span>).', isCorrect: false },
+                    { text: 'Jun trên giây (<span class="math-num">J/s</span>).', isCorrect: false },
+                    { text: 'Kilôgam nhân mét trên giây (<span class="math-num">kg·m/s</span>).', isCorrect: false }
+                ],
+                explanation: 'Vì <span class="math">M = F · d</span>, trong đó <span class="math">F</span> đo bằng Newton (<span class="math-num">N</span>) và <span class="math">d</span> đo bằng mét (<span class="math-num">m</span>), nên đơn vị của moment lực là <b>Newton nhân mét (<span class="math-num">N·m</span>)</b>.'
+            },
+            {
+                id: 'L1_04',
+                level: 1,
+                topic: 'Khái niệm cánh tay đòn',
+                question: 'Cánh tay đòn <span class="math">d</span> của một lực <span class="vec">F</span> đối với trục quay <span class="math">O</span> là khoảng cách nào sau đây?',
+                svg: `<svg viewBox="0 0 380 150" class="w-full max-w-md mx-auto h-36">
+                    <defs>
+                        <marker id="arrR4" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+                        </marker>
+                    </defs>
+                    <!-- Vật rắn bất kì -->
+                    <path d="M 55 85 C 45 40, 120 20, 210 35 C 280 48, 300 95, 235 120 C 160 135, 65 120, 55 85 Z" fill="#f8fafc" stroke="#475569" stroke-width="2"/>
+                    <!-- Trục quay O -->
+                    <circle cx="95" cy="85" r="5" fill="#0f172a"/>
+                    <text x="76" y="90" font-size="15" font-weight="bold" font-family="Times New Roman" font-style="italic">O</text>
+                    <!-- Giá của lực (đường nét đứt) -->
+                    <line x1="155" y1="15" x2="295" y2="135" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="5,4"/>
+                    <text x="275" y="110" font-size="11" fill="#dc2626">Giá của lực</text>
+                    <!-- Vector lực F -->
+                    <line x1="215" y1="66.5" x2="265" y2="109.3" stroke="#dc2626" stroke-width="3" marker-end="url(#arrR4)"/>
+                    <text x="255" y="88" font-size="16" font-weight="bold" font-family="Times New Roman" font-style="italic" fill="#dc2626">F⃗</text>
+                    <!-- Đường vuông góc OH = d -->
+                    <line x1="95" y1="85" x2="177" y2="34" stroke="#2563eb" stroke-width="2.5" stroke-dasharray="4,2"/>
+                    <!-- Kí hiệu góc vuông tại H -->
+                    <polygon points="177,34 170.5,38 175,45 181.5,41" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+                    <circle cx="177" cy="34" r="3.5" fill="#2563eb"/>
+                    <text x="178" y="26" font-size="13" font-weight="bold" font-family="Times New Roman" font-style="italic" fill="#2563eb">H</text>
+                    <text x="125" y="52" font-size="16" font-weight="bold" font-family="Times New Roman" font-style="italic" fill="#2563eb">d</text>
+                </svg>`,
+                options: [
+                    { text: 'Khoảng cách vuông góc từ trục quay <span class="math">O</span> đến giá của lực <span class="vec">F</span>.', isCorrect: true },
+                    { text: 'Khoảng cách từ trục quay <span class="math">O</span> đến ngọn của vectơ lực <span class="vec">F</span>.', isCorrect: false },
+                    { text: 'Khoảng cách từ trọng tâm của vật đến điểm đặt của lực <span class="vec">F</span>.', isCorrect: false },
+                    { text: 'Chiều dài của toàn bộ thanh rắn chịu tác dụng lực.', isCorrect: false }
+                ],
+                explanation: '<b>Cánh tay đòn <span class="math">d</span></b> luôn được xác định bằng <b>khoảng cách vuông góc từ trục quay <span class="math">O</span> đến giá của lực</b> (trên hình là đoạn <span class="math">OH = d</span>).'
+            },
+            {
+                id: 'L1_05',
+                level: 1,
+                topic: 'Khi nào lực không gây tác dụng quay',
+                question: 'Trường hợp nào sau đây lực <span class="vec">F</span> tác dụng lên vật rắn <b>không</b> làm cho vật quay quanh trục <span class="math">O</span> (tức <span class="math">M = 0</span>)?',
+                svg: `<svg viewBox="0 0 380 120" class="w-full max-w-md mx-auto h-28">
+                    <defs>
+                        <marker id="arrR5" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+                        </marker>
+                    </defs>
+                    <!-- Trục quay O và thanh OA -->
+                    <polygon points="55,60 40,85 70,85" fill="#64748b" stroke="#1e293b" stroke-width="2"/>
+                    <rect x="55" y="53" width="185" height="14" rx="4" fill="#cbd5e1" stroke="#334155" stroke-width="2"/>
+                    <circle cx="55" cy="60" r="5" fill="#0f172a"/>
+                    <text x="50" y="44" font-size="14" font-weight="bold" font-family="Times New Roman" font-style="italic">O</text>
+                    <!-- Giá của lực đi xuyên qua O -->
+                    <line x1="20" y1="60" x2="345" y2="60" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="5,3"/>
+                    <!-- Vector lực F kéo dọc theo thanh -->
+                    <line x1="240" y1="60" x2="325" y2="60" stroke="#dc2626" stroke-width="3.2" marker-end="url(#arrR5)"/>
+                    <text x="280" y="46" font-size="16" font-weight="bold" font-family="Times New Roman" font-style="italic" fill="#dc2626">F⃗</text>
+                    <text x="150" y="102" font-size="13" font-weight="bold" fill="#dc2626">Giá của lực đi qua trục quay O (d = 0)</text>
+                </svg>`,
+                options: [
+                    { text: 'Có giá cắt (đi qua) trục quay hoặc song song với trục quay.', isCorrect: true },
+                    { text: 'Có giá vuông góc với thanh rắn tại đầu mút của thanh.', isCorrect: false },
+                    { text: 'Có giá hợp với thanh rắn một góc <span class="math-num">60°</span>.', isCorrect: false },
+                    { text: 'Có độ lớn lực rất lớn và đặt xa trục quay.', isCorrect: false }
+                ],
+                explanation: 'Khi lực có <b>giá đi qua trục quay</b> (cánh tay đòn <span class="math">d = 0</span>) hoặc <b>song song với trục quay</b> thì moment lực <span class="math">M = F · 0 = 0</span>, lực không gây tác dụng làm quay vật.'
+            },
+            {
+                id: 'L1_06',
+                level: 1,
+                topic: 'Phép tính 1 bước - Tính Moment lực',
+                question: 'Một người dùng cờ lê để vặn đai ốc quanh tâm <span class="math">O</span>. Người đó tác dụng một lực <span class="math">F = 40</span> <span class="math-num">N</span> có giá vuông góc với thân cờ lê và cách tâm <span class="math">O</span> một đoạn <span class="math">d = 0,25</span> <span class="math-num">m</span>. Moment của lực này đối với trục quay qua <span class="math">O</span> là:',
+                svg: `<svg viewBox="0 0 380 135" class="w-full max-w-md mx-auto h-32">
+                    <defs>
+                        <marker id="arrR6" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+                        </marker>
+                    </defs>
+                    <polygon points="65,48 80,56 80,72 65,80 50,72 50,56" fill="#94a3b8" stroke="#1e293b" stroke-width="2"/>
+                    <rect x="78" y="57" width="195" height="14" rx="5" fill="#cbd5e1" stroke="#334155" stroke-width="2"/>
+                    <circle cx="65" cy="64" r="4" fill="#0f172a"/>
+                    <text x="58" y="40" font-size="14" font-weight="bold" font-family="Times New Roman" font-style="italic">O</text>
+                    <!-- Đường gióng d = 0,25 m -->
+                    <line x1="65" y1="64" x2="65" y2="22" stroke="#2563eb" stroke-dasharray="3,3"/>
+                    <line x1="265" y1="64" x2="265" y2="22" stroke="#2563eb" stroke-dasharray="3,3"/>
+                    <line x1="65" y1="28" x2="265" y2="28" stroke="#2563eb" stroke-width="2"/>
+                    <text x="165" y="21" text-anchor="middle" font-size="13" font-weight="bold" fill="#1d4ed8">d = 0,25 m</text>
+                    <rect x="256" y="64" width="9" height="9" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+                    <!-- Vector F = 40 N -->
+                    <line x1="265" y1="64" x2="265" y2="120" stroke="#dc2626" stroke-width="3" marker-end="url(#arrR6)"/>
+                    <text x="275" y="108" font-size="14" font-weight="bold" fill="#dc2626">F = 40 N</text>
+                </svg>`,
+                options: [
+                    { text: '<span class="math-num">10 N·m</span>', isCorrect: true },
+                    { text: '<span class="math-num">160 N·m</span>', isCorrect: false },
+                    { text: '<span class="math-num">100 N·m</span>', isCorrect: false },
+                    { text: '<span class="math-num">40,25 N·m</span>', isCorrect: false }
+                ],
+                explanation: 'Áp dụng công thức: <span class="math">M = F · d = 40 · 0,25 = </span><b><span class="math-num">10 N·m</span></b>.'
+            },
+            {
+                id: 'L1_07',
+                level: 1,
+                topic: 'Phép tính 1 bước - Đổi đơn vị cm sang m',
+                question: 'Một lực có độ lớn <span class="math">F = 20</span> <span class="math-num">N</span> tác dụng lên cánh cửa tạo ra một moment lực <span class="math">M = 12</span> <span class="math-num">N·m</span> đối với trục bản lề. Cánh tay đòn <span class="math">d</span> của lực có giá trị bằng:',
+                svg: `<svg viewBox="0 0 380 130" class="w-full max-w-md mx-auto h-32">
+                    <defs>
+                        <marker id="arrR7" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+                        </marker>
+                    </defs>
+                    <rect x="45" y="25" width="10" height="80" fill="#334155"/>
+                    <rect x="55" y="55" width="210" height="12" rx="3" fill="#fde68a" stroke="#b45309" stroke-width="2"/>
+                    <circle cx="55" cy="61" r="5" fill="#0f172a"/>
+                    <text x="40" y="20" font-size="13" font-weight="bold">O (M = 12 N·m)</text>
+                    <line x1="55" y1="36" x2="255" y2="36" stroke="#2563eb" stroke-width="2" stroke-dasharray="4,3"/>
+                    <line x1="255" y1="30" x2="255" y2="61" stroke="#64748b" stroke-dasharray="3,3"/>
+                    <text x="155" y="30" text-anchor="middle" font-size="14" font-weight="bold" fill="#2563eb">d = ? (cm)</text>
+                    <line x1="255" y1="61" x2="255" y2="115" stroke="#dc2626" stroke-width="3" marker-end="url(#arrR7)"/>
+                    <text x="266" y="105" font-size="14" font-weight="bold" fill="#dc2626">F = 20 N</text>
+                </svg>`,
+                options: [
+                    { text: '<span class="math-num">60 cm</span>', isCorrect: true },
+                    { text: '<span class="math-num">0,6 cm</span>', isCorrect: false },
+                    { text: '<span class="math-num">240 cm</span>', isCorrect: false },
+                    { text: '<span class="math-num">1,67 m</span>', isCorrect: false }
+                ],
+                explanation: 'Từ công thức <span class="math">M = F · d</span> suy ra: <span class="math">d = M / F = 12 / 20 = 0,6</span> <span class="math-num">m</span> = <b><span class="math-num">60 cm</span></b>.'
+            },
+            {
+                id: 'L1_08',
+                level: 1,
+                topic: 'Phép tính 1 bước - Tìm độ lớn lực F',
+                question: 'Để tháo một đai ốc cần một moment lực tối thiểu là <span class="math">M = 18</span> <span class="math-num">N·m</span>. Nếu dùng cờ lê có cánh tay đòn <span class="math">d = 0,3</span> <span class="math-num">m</span> thì cần tác dụng lực <span class="math">F</span> tối thiểu bằng bao nhiêu?',
+                svg: `<svg viewBox="0 0 380 130" class="w-full max-w-md mx-auto h-32">
+                    <defs>
+                        <marker id="arrR8" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+                        </marker>
+                    </defs>
+                    <polygon points="75,45 90,53 90,69 75,77 60,69 60,53" fill="#94a3b8" stroke="#1e293b" stroke-width="2"/>
+                    <rect x="88" y="54" width="185" height="14" rx="5" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>
+                    <circle cx="75" cy="61" r="4" fill="#0f172a"/>
+                    <text x="45" y="32" font-size="13" font-weight="bold" fill="#0f172a">M = 18 N·m</text>
+                    <line x1="75" y1="38" x2="265" y2="38" stroke="#2563eb" stroke-width="2"/>
+                    <line x1="265" y1="32" x2="265" y2="61" stroke="#64748b" stroke-dasharray="3,3"/>
+                    <text x="170" y="30" text-anchor="middle" font-size="13" font-weight="bold" fill="#2563eb">d = 0,3 m</text>
+                    <line x1="265" y1="61" x2="265" y2="116" stroke="#dc2626" stroke-width="3" marker-end="url(#arrR8)"/>
+                    <text x="275" y="105" font-size="14" font-weight="bold" fill="#dc2626">F = ? (N)</text>
+                </svg>`,
+                options: [
+                    { text: '<span class="math-num">60 N</span>', isCorrect: true },
+                    { text: '<span class="math-num">5,4 N</span>', isCorrect: false },
+                    { text: '<span class="math-num">6 N</span>', isCorrect: false },
+                    { text: '<span class="math-num">54 N</span>', isCorrect: false }
+                ],
+                explanation: 'Ta có <span class="math">M = F · d ⇒ F = M / d = 18 / 0,3 = </span><b><span class="math-num">60 N</span></b>.'
+            },
+            {
+                id: 'L1_09',
+                level: 1,
+                topic: 'Khái niệm Ngẫu lực',
+                question: 'Hệ hai lực như thế nào tác dụng vào cùng một vật rắn thì được gọi là một <b>ngẫu lực</b>?',
+                svg: `<svg viewBox="0 0 380 140" class="w-full max-w-md mx-auto h-32">
+                    <defs>
+                        <marker id="arrR9" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+                        </marker>
+                    </defs>
+                    <!-- Vô lăng ô tô -->
+                    <circle cx="190" cy="70" r="46" fill="none" stroke="#334155" stroke-width="9"/>
+                    <circle cx="190" cy="70" r="10" fill="#475569"/>
+                    <line x1="144" y1="70" x2="236" y2="70" stroke="#475569" stroke-width="5"/>
+                    <line x1="190" y1="70" x2="190" y2="116" stroke="#475569" stroke-width="5"/>
+                    <!-- Lực F1 hướng lên bên trái -->
+                    <line x1="144" y1="70" x2="144" y2="16" stroke="#dc2626" stroke-width="3" marker-end="url(#arrR9)"/>
+                    <text x="115" y="30" font-size="15" font-weight="bold" font-family="Times New Roman" font-style="italic" fill="#dc2626">F⃗₁</text>
+                    <!-- Lực F2 hướng xuống bên phải -->
+                    <line x1="236" y1="70" x2="236" y2="124" stroke="#dc2626" stroke-width="3" marker-end="url(#arrR9)"/>
+                    <text x="248" y="118" font-size="15" font-weight="bold" font-family="Times New Roman" font-style="italic" fill="#dc2626">F⃗₂</text>
+                    <!-- Khoảng cách d giữa 2 giá -->
+                    <line x1="144" y1="70" x2="236" y2="70" stroke="#2563eb" stroke-width="2" stroke-dasharray="4,2"/>
+                    <text x="190" y="63" text-anchor="middle" font-size="14" font-weight="bold" font-family="Times New Roman" font-style="italic" fill="#2563eb">d</text>
+                </svg>`,
+                options: [
+                    { text: 'Song song, ngược chiều, có độ lớn bằng nhau và cùng tác dụng vào một vật.', isCorrect: true },
+                    { text: 'Song song, cùng chiều, có độ lớn bằng nhau và cùng tác dụng vào một vật.', isCorrect: false },
+                    { text: 'Cùng giá, ngược chiều, có độ lớn bằng nhau và cùng tác dụng vào một vật.', isCorrect: false },
+                    { text: 'Vuông góc với nhau và có cùng độ lớn tác dụng vào một vật.', isCorrect: false }
+                ],
+                explanation: '<b>Ngẫu lực</b> là hệ hai lực <b>song song, ngược chiều, có độ lớn bằng nhau</b> (<span class="math">F</span><sub class="math-num">1</sub> = <span class="math">F</span><sub class="math-num">2</sub> = <span class="math">F</span>) và cùng tác dụng vào một vật rắn (không cùng giá).'
+            },
+            {
+                id: 'L1_10',
+                level: 1,
+                topic: 'Phép tính 1 bước - Moment của ngẫu lực',
+                question: 'Một người dùng hai tay xoay vô lăng ô tô đường kính <span class="math">d = 0,4</span> <span class="math-num">m</span> bằng một ngẫu lực, mỗi tay tác dụng lực <span class="math">F</span><sub class="math-num">1</sub> = <span class="math">F</span><sub class="math-num">2</sub> = <span class="math">15</span> <span class="math-num">N</span> tiếp tuyến với vành vô lăng. Moment của ngẫu lực này là:',
+                svg: `<svg viewBox="0 0 380 140" class="w-full max-w-md mx-auto h-32">
+                    <defs>
+                        <marker id="arrR10" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+                        </marker>
+                    </defs>
+                    <circle cx="190" cy="70" r="44" fill="#f8fafc" stroke="#1e293b" stroke-width="7"/>
+                    <circle cx="190" cy="70" r="7" fill="#1e293b"/>
+                    <line x1="146" y1="70" x2="234" y2="70" stroke="#2563eb" stroke-width="2.5" stroke-dasharray="4,2"/>
+                    <text x="190" y="62" text-anchor="middle" font-size="13" font-weight="bold" fill="#1d4ed8">d = 0,4 m</text>
+                    <line x1="146" y1="70" x2="146" y2="18" stroke="#dc2626" stroke-width="3" marker-end="url(#arrR10)"/>
+                    <text x="72" y="34" font-size="13" font-weight="bold" fill="#dc2626">F₁ = 15 N</text>
+                    <line x1="234" y1="70" x2="234" y2="122" stroke="#dc2626" stroke-width="3" marker-end="url(#arrR10)"/>
+                    <text x="245" y="114" font-size="13" font-weight="bold" fill="#dc2626">F₂ = 15 N</text>
+                </svg>`,
+                options: [
+                    { text: '<span class="math-num">6 N·m</span>', isCorrect: true },
+                    { text: '<span class="math-num">12 N·m</span>', isCorrect: false },
+                    { text: '<span class="math-num">3 N·m</span>', isCorrect: false },
+                    { text: '<span class="math-num">30 N·m</span>', isCorrect: false }
+                ],
+                explanation: 'Công thức moment của ngẫu lực là <span class="math">M = F · d</span> (trong đó <span class="math">F = 15</span> <span class="math-num">N</span> là độ lớn của mỗi lực và <span class="math">d = 0,4</span> <span class="math-num">m</span> là khoảng cách giữa hai giá của lực).<br>Do đó: <span class="math">M = 15 · 0,4 = </span><b><span class="math-num">6 N·m</span></b> (Lưu ý không nhân đôi 2 lực!).'
+            },
+            {
+                id: 'L1_11',
+                level: 1,
+                topic: 'Quy tắc Moment lực',
+                question: 'Theo quy tắc moment lực, muốn cho một vật có trục quay cố định ở trạng thái cân bằng thì:',
+                svg: `<svg viewBox="0 0 380 130" class="w-full max-w-md mx-auto h-32">
+                    <defs>
+                        <marker id="arrR11" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+                        </marker>
+                        <marker id="arrB11" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb"/>
+                        </marker>
+                    </defs>
+                    <!-- Đòn bẩy cân bằng -->
+                    <polygon points="190,62 174,95 206,95" fill="#fbbf24" stroke="#b45309" stroke-width="2"/>
+                    <line x1="140" y1="95" x2="240" y2="95" stroke="#475569" stroke-width="3"/>
+                    <rect x="65" y="54" width="250" height="8" rx="3" fill="#334155"/>
+                    <circle cx="190" cy="58" r="4" fill="#fff"/>
+                    <text x="190" y="45" text-anchor="middle" font-size="14" font-weight="bold" font-family="Times New Roman" font-style="italic">O</text>
+                    <!-- Lực bên trái (ngược chiều kim đồng hồ) -->
+                    <line x1="85" y1="58" x2="85" y2="112" stroke="#2563eb" stroke-width="3" marker-end="url(#arrB11)"/>
+                    <text x="93" y="108" font-size="13" font-weight="bold" fill="#2563eb">M ngược chiều</text>
+                    <!-- Lực bên phải (cùng chiều kim đồng hồ) -->
+                    <line x1="295" y1="58" x2="295" y2="112" stroke="#dc2626" stroke-width="3" marker-end="url(#arrR11)"/>
+                    <text x="210" y="108" font-size="13" font-weight="bold" fill="#dc2626">M cùng chiều</text>
+                </svg>`,
+                options: [
+                    { text: 'Tổng các moment lực có xu hướng làm vật quay theo chiều kim đồng hồ phải bằng tổng các moment lực có xu hướng làm vật quay theo chiều ngược lại.', isCorrect: true },
+                    { text: 'Hai lực tác dụng lên vật phải luôn có độ lớn bằng nhau.', isCorrect: false },
+                    { text: 'Hai cánh tay đòn của lực ở hai bên trục quay phải luôn bằng nhau.', isCorrect: false },
+                    { text: 'Trục quay cố định bắt buộc phải đặt tại chính giữa của vật.', isCorrect: false }
+                ],
+                explanation: '<b>Quy tắc moment lực</b>: Muốn cho một vật có trục quay cố định ở trạng thái cân bằng, thì <b>tổng các moment lực có xu hướng làm vật quay theo chiều kim đồng hồ phải bằng tổng các moment lực có xu hướng làm vật quay theo chiều ngược lại</b> (<span class="math">∑M</span><sub class="math-num">cùng chiều</sub> = <span class="math">∑M</span><sub class="math-num">ngược chiều</sub>).'
+            },
+            {
+                id: 'L1_12',
+                level: 1,
+                topic: 'Điều kiện cân bằng tổng quát của vật rắn',
+                question: 'Điều kiện cân bằng tổng quát của một vật rắn bất kì dưới tác dụng của các lực là gì?',
+                svg: `<svg viewBox="0 0 380 120" class="w-full max-w-md mx-auto h-28">
+                    <rect x="20" y="20" width="155" height="80" rx="12" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+                    <text x="97" y="48" text-anchor="middle" font-size="12" font-weight="bold" fill="#1d4ed8">Không tịnh tiến (gia tốc = 0)</text>
+                    <text x="97" y="76" text-anchor="middle" font-size="17" font-weight="bold" font-family="Times New Roman" fill="#1e3a8a">∑ F⃗ = 0⃗</text>
+
+                    <text x="190" y="65" text-anchor="middle" font-size="18" font-weight="bold" fill="#0f172a">&amp;</text>
+
+                    <rect x="205" y="20" width="155" height="80" rx="12" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+                    <text x="282" y="48" text-anchor="middle" font-size="12" font-weight="bold" fill="#047857">Không quay quanh trục</text>
+                    <text x="282" y="76" text-anchor="middle" font-size="17" font-weight="bold" font-family="Times New Roman" fill="#065f46">∑ M = 0</text>
+                </svg>`,
+                options: [
+                    { text: 'Tổng các lực tác dụng lên vật bằng <span class="math-num">0</span> và tổng các moment lực tác dụng lên vật đối với một điểm bất kì bằng <span class="math-num">0</span>.', isCorrect: true },
+                    { text: 'Chỉ cần tổng các lực tác dụng lên vật bằng <span class="math-num">0</span>.', isCorrect: false },
+                    { text: 'Chỉ cần tổng các moment lực đối với trọng tâm bằng <span class="math-num">0</span>.', isCorrect: false },
+                    { text: 'Vật không chịu tác dụng của trọng lực và lực ma sát.', isCorrect: false }
+                ],
+                explanation: 'Điều kiện cân bằng tổng quát của vật rắn gồm <b>2 điều kiện đồng thời</b>:<br>1) Tổng các lực tác dụng lên vật bằng không (<span class="math">∑</span><span class="vec">F</span> = <span class="vec">0</span>).<br>2) Tổng các moment lực đối với một điểm bất kì chọn làm trục quay bằng không (<span class="math">∑M = 0</span>).'
+            },
+
+            // ================= CẤP ĐỘ 2: 5 CÂU (VẬN DỤNG 7 - 8 ĐIỂM) =================
+            {
+                id: 'L2_01',
+                level: 2,
+                topic: 'Cân bằng bập bênh (Quy tắc Moment)',
+                question: 'Trên một chiếc bập bênh nhẹ, bạn An có trọng lượng <span class="math">P</span><sub class="math-num">1</sub> = <span class="math-num">400 N</span> ngồi cách trục quay <span class="math">O</span> một đoạn <span class="math">d</span><sub class="math-num">1</sub> = <span class="math-num">1,5 m</span>. Để bập bênh cân bằng nằm ngang, bạn Bình có trọng lượng <span class="math">P</span><sub class="math-num">2</sub> = <span class="math-num">500 N</span> phải ngồi phía bên kia cách trục quay <span class="math">O</span> một đoạn <span class="math">d</span><sub class="math-num">2</sub> bằng bao nhiêu?',
+                svg: `<svg viewBox="0 0 400 150" class="w-full max-w-md mx-auto h-36">
+                    <defs>
+                        <marker id="arrB21" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb"/>
+                        </marker>
+                        <marker id="arrR21" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+                        </marker>
+                    </defs>
+                    <!-- Giá đỡ O -->
+                    <polygon points="210,75 192,112 228,112" fill="#f59e0b" stroke="#b45309" stroke-width="2"/>
+                    <line x1="40" y1="112" x2="360" y2="112" stroke="#64748b" stroke-width="2.5"/>
+                    <!-- Thanh bập bênh -->
+                    <rect x="65" y="67" width="275" height="8" rx="3" fill="#1e293b"/>
+                    <circle cx="210" cy="71" r="4" fill="#fff"/>
+                    <text x="210" y="60" text-anchor="middle" font-size="14" font-weight="bold" font-family="Times New Roman" font-style="italic">O</text>
+                    <!-- Khoảng cách d1 = 1,5m và d2 = ? -->
+                    <line x1="80" y1="67" x2="80" y2="28" stroke="#64748b" stroke-dasharray="3,3"/>
+                    <line x1="210" y1="67" x2="210" y2="28" stroke="#64748b" stroke-dasharray="3,3"/>
+                    <line x1="315" y1="67" x2="315" y2="28" stroke="#64748b" stroke-dasharray="3,3"/>
+                    <line x1="80" y1="34" x2="210" y2="34" stroke="#2563eb" stroke-width="2"/>
+                    <text x="145" y="26" text-anchor="middle" font-size="13" font-weight="bold" fill="#2563eb">d₁ = 1,5 m</text>
+                    <line x1="210" y1="34" x2="315" y2="34" stroke="#dc2626" stroke-width="2"/>
+                    <text x="262" y="26" text-anchor="middle" font-size="13" font-weight="bold" fill="#dc2626">d₂ = ?</text>
+                    <!-- Vector P1 và P2 -->
+                    <line x1="80" y1="71" x2="80" y2="132" stroke="#2563eb" stroke-width="3" marker-end="url(#arrB21)"/>
+                    <text x="88" y="135" font-size="13" font-weight="bold" fill="#2563eb">P₁ = 400 N</text>
+                    <line x1="315" y1="71" x2="315" y2="138" stroke="#dc2626" stroke-width="3" marker-end="url(#arrR21)"/>
+                    <text x="323" y="135" font-size="13" font-weight="bold" fill="#dc2626">P₂ = 500 N</text>
+                </svg>`,
+                options: [
+                    { text: '<span class="math-num">1,2 m</span>', isCorrect: true },
+                    { text: '<span class="math-num">1,875 m</span>', isCorrect: false },
+                    { text: '<span class="math-num">1,5 m</span>', isCorrect: false },
+                    { text: '<span class="math-num">0,8 m</span>', isCorrect: false }
+                ],
+                explanation: 'Áp dụng quy tắc moment lực đối với trục quay <span class="math">O</span>:<br><span class="math">P</span><sub class="math-num">1</sub> · <span class="math">d</span><sub class="math-num">1</sub> = <span class="math">P</span><sub class="math-num">2</sub> · <span class="math">d</span><sub class="math-num">2</sub> ⇒ <span class="math">d</span><sub class="math-num">2</sub> = (<span class="math">P</span><sub class="math-num">1</sub> · <span class="math">d</span><sub class="math-num">1</sub>) / <span class="math">P</span><sub class="math-num">2</sub> = (<span class="math-num">400 · 1,5</span>) / <span class="math-num">500</span> = <b><span class="math-num">1,2 m</span></b>.'
+            },
+            {
+                id: 'L2_02',
+                level: 2,
+                topic: 'Lực hợp góc α với thanh rắn',
+                question: 'Một thanh cứng <span class="math">OA</span> dài <span class="math">l = 0,8</span> <span class="math-num">m</span> có thể quay quanh bản lề cố định tại <span class="math">O</span>. Tác dụng vào đầu <span class="math">A</span> một lực <span class="vec">F</span> có độ lớn <span class="math-num">50 N</span> hợp với thanh <span class="math">OA</span> một góc <span class="math">α = 30°</span> như hình vẽ. Moment của lực <span class="vec">F</span> đối với trục quay <span class="math">O</span> bằng:',
+                svg: `<svg viewBox="0 0 400 165" class="w-full max-w-md mx-auto h-40">
+                    <defs>
+                        <marker id="arrR22" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+                        </marker>
+                    </defs>
+                    <!-- Tường & bản lề O -->
+                    <rect x="45" y="30" width="10" height="110" fill="#64748b"/>
+                    <rect x="55" y="92" width="210" height="10" rx="3" fill="#94a3b8" stroke="#1e293b" stroke-width="2"/>
+                    <circle cx="55" cy="97" r="5" fill="#0f172a"/>
+                    <text x="38" y="102" font-size="14" font-weight="bold" font-family="Times New Roman" font-style="italic">O</text>
+                    <circle cx="265" cy="97" r="4" fill="#0f172a"/>
+                    <text x="265" y="118" font-size="14" font-weight="bold" font-family="Times New Roman" font-style="italic">A</text>
+                    <text x="155" y="116" text-anchor="middle" font-size="13" font-weight="bold" fill="#334155">OA = l = 0,8 m</text>
+                    <!-- Giá của lực F (hợp góc 30 độ với OA) -->
+                    <line x1="125" y1="16" x2="345" y2="143" stroke="#dc2626" stroke-width="1.4" stroke-dasharray="5,4"/>
+                    <!-- Vector lực F -->
+                    <line x1="265" y1="97" x2="335" y2="137.4" stroke="#dc2626" stroke-width="3" marker-end="url(#arrR22)"/>
+                    <text x="338" y="132" font-size="14" font-weight="bold" fill="#dc2626">F⃗ (50 N)</text>
+                    <!-- Cung góc 30 độ -->
+                    <path d="M 225 97 A 40 40 0 0 1 231 77" fill="none" stroke="#b45309" stroke-width="2"/>
+                    <text x="188" y="88" font-size="13" font-weight="bold" fill="#b45309">30°</text>
+                    <!-- Cánh tay đòn OH = d = l.sin30 -->
+                    <line x1="55" y1="97" x2="107.5" y2="6" stroke="#2563eb" stroke-width="1" opacity="0"/>
+                    <line x1="55" y1="97" x2="142" y2="26" stroke="#2563eb" stroke-width="2.2" stroke-dasharray="4,2"/>
+                    <circle cx="142" cy="26" r="3.5" fill="#2563eb"/>
+                    <text x="148" y="23" font-size="13" font-weight="bold" fill="#2563eb">H</text>
+                    <text x="72" y="55" font-size="13" font-weight="bold" fill="#2563eb">d = l·sin30°</text>
+                </svg>`,
+                options: [
+                    { text: '<span class="math-num">20 N·m</span>', isCorrect: true },
+                    { text: '<span class="math-num">40 N·m</span>', isCorrect: false },
+                    { text: '<span class="math-num">34,6 N·m</span>', isCorrect: false },
+                    { text: '<span class="math-num">25 N·m</span>', isCorrect: false }
+                ],
+                explanation: 'Hạ đường vuông góc <span class="math">OH</span> từ trục quay <span class="math">O</span> xuống giá của lực <span class="vec">F</span>.<br>Trong tam giác vuông <span class="math">OHA</span>: cánh tay đòn <span class="math">d = OH = OA ·</span> sin<span class="math-num">30° = 0,8 · 0,5 = 0,4 m</span>.<br>Moment lực: <span class="math">M = F · d = 50 · 0,4 = </span><b><span class="math-num">20 N·m</span></b>.'
+            },
+            {
+                id: 'L2_03',
+                level: 2,
+                topic: 'Thanh đồng chất có khối lượng đáng kể',
+                question: 'Một thanh cứng <span class="math">AB</span> đồng chất, tiết diện đều có chiều dài <span class="math">AB = 1,2</span> <span class="math-num">m</span> và trọng lượng <span class="math">P = 30</span> <span class="math-num">N</span>, có trục quay tại điểm <span class="math">O</span> cách đầu <span class="math">A</span> một đoạn <span class="math">OA = 0,4</span> <span class="math-num">m</span>. Hỏi phải treo vào đầu <span class="math">A</span> một vật có trọng lượng <span class="math">P</span><sub class="math-num">1</sub> bằng bao nhiêu để thanh <span class="math">AB</span> nằm ngang cân bằng?',
+                svg: `<svg viewBox="0 0 400 155" class="w-full max-w-md mx-auto h-36">
+                    <defs>
+                        <marker id="arrB23" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb"/>
+                        </marker>
+                        <marker id="arrR23" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+                        </marker>
+                    </defs>
+                    <!-- Thanh AB = 1,2m (từ x=60 đến x=360, tỉ lệ 250px = 1m -> 300px = 1.2m) -->
+                    <rect x="50" y="60" width="300" height="10" rx="3" fill="#cbd5e1" stroke="#334155" stroke-width="2"/>
+                    <!-- Điểm tựa O tại OA = 0,4m => x = 50 + 100 = 150 -->
+                    <polygon points="150,70 135,102 165,102" fill="#f59e0b" stroke="#b45309" stroke-width="2"/>
+                    <!-- Trọng tâm G tại trung điểm AB (AG = 0,6m => x = 50 + 150 = 200) -->
+                    <circle cx="200" cy="65" r="4" fill="#dc2626"/>
+                    <text x="200" y="53" text-anchor="middle" font-size="13" font-weight="bold" fill="#dc2626">G (중 tâm)</text>
+                    <line x1="200" y1="65" x2="200" y2="128" stroke="#dc2626" stroke-width="3" marker-end="url(#arrR23)"/>
+                    <text x="210" y="124" font-size="13" font-weight="bold" fill="#dc2626">P = 30 N</text>
+                    <!-- Đầu A treo vật P1 -->
+                    <line x1="50" y1="65" x2="50" y2="130" stroke="#2563eb" stroke-width="3" marker-end="url(#arrB23)"/>
+                    <text x="58" y="128" font-size="13" font-weight="bold" fill="#2563eb">P₁ = ?</text>
+                    <!-- Nhãn A, O, B và kích thước -->
+                    <text x="48" y="53" font-size="13" font-weight="bold">A</text>
+                    <text x="150" y="53" text-anchor="middle" font-size="13" font-weight="bold">O</text>
+                    <text x="348" y="53" font-size="13" font-weight="bold">B</text>
+                    <line x1="50" y1="30" x2="150" y2="30" stroke="#2563eb" stroke-width="1.8"/>
+                    <text x="100" y="23" text-anchor="middle" font-size="12" font-weight="bold" fill="#2563eb">OA = 0,4m</text>
+                    <line x1="150" y1="30" x2="200" y2="30" stroke="#dc2626" stroke-width="1.8"/>
+                    <text x="178" y="23" text-anchor="middle" font-size="12" font-weight="bold" fill="#dc2626">OG = 0,2m</text>
+                </svg>`,
+                options: [
+                    { text: '<span class="math-num">15 N</span>', isCorrect: true },
+                    { text: '<span class="math-num">30 N</span>', isCorrect: false },
+                    { text: '<span class="math-num">60 N</span>', isCorrect: false },
+                    { text: '<span class="math-num">20 N</span>', isCorrect: false }
+                ],
+                explanation: 'Vì thanh <span class="math">AB</span> đồng chất, tiết diện đều nên trọng lực <span class="math">P = 30</span> <span class="math-num">N</span> đặt tại trung điểm <span class="math">G</span> của thanh: <span class="math">AG = AB / 2 = 0,6</span> <span class="math-num">m</span>.<br>Cánh tay đòn của trọng lực <span class="math">P</span> đối với trục quay <span class="math">O</span> là: <span class="math">OG = AG - OA = 0,6 - 0,4 = 0,2</span> <span class="math-num">m</span>.<br>Điều kiện cân bằng moment quanh <span class="math">O</span>: <span class="math">P</span><sub class="math-num">1</sub> · <span class="math">OA = P · OG ⇒ P</span><sub class="math-num">1</sub> = (<span class="math-num">30 · 0,2</span>) / <span class="math-num">0,4</span> = <b><span class="math-num">15 N</span></b>.'
+            },
+            {
+                id: 'L2_04',
+                level: 2,
+                topic: 'Hợp hai lực song song cùng chiều (Gánh vật)',
+                question: 'Một người dùng đòn gánh nhẹ dài <span class="math">AB = 1,5</span> <span class="math-num">m</span> để gánh một thúng gạo nặng <span class="math">P</span><sub class="math-num">1</sub> = <span class="math-num">300 N</span> ở đầu <span class="math">A</span> và một thúng ngô nặng <span class="math">P</span><sub class="math-num">2</sub> = <span class="math-num">200 N</span> ở đầu <span class="math">B</span>. Vai người đặt tại điểm <span class="math">O</span> cách đầu <span class="math">A</span> bao nhiêu để đòn gánh cân bằng và lực đè lên vai là bao nhiêu?',
+                svg: `<svg viewBox="0 0 400 155" class="w-full max-w-md mx-auto h-36">
+                    <defs>
+                        <marker id="arrB24" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb"/>
+                        </marker>
+                        <marker id="arrR24" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+                        </marker>
+                    </defs>
+                    <rect x="55" y="58" width="290" height="8" rx="4" fill="#b45309"/>
+                    <!-- Vai tại O (OA = 0.6m, OB = 0.9m) => x = 55 + 116 = 171 -->
+                    <polygon points="171,66 156,95 186,95" fill="#fbbf24" stroke="#92400e" stroke-width="2"/>
+                    <text x="171" y="50" text-anchor="middle" font-size="13" font-weight="bold">Vai (O)</text>
+                    <!-- Thúng gạo A -->
+                    <line x1="55" y1="62" x2="55" y2="132" stroke="#2563eb" stroke-width="3" marker-end="url(#arrB24)"/>
+                    <text x="63" y="128" font-size="13" font-weight="bold" fill="#2563eb">P₁ = 300 N (A)</text>
+                    <!-- Thúng ngô B -->
+                    <line x1="345" y1="62" x2="345" y2="122" stroke="#dc2626" stroke-width="3" marker-end="url(#arrR24)"/>
+                    <text x="245" y="128" font-size="13" font-weight="bold" fill="#dc2626">P₂ = 200 N (B)</text>
+                    <!-- Kích thước -->
+                    <line x1="55" y1="28" x2="345" y2="28" stroke="#475569" stroke-width="1.6" stroke-dasharray="4,2"/>
+                    <text x="200" y="21" text-anchor="middle" font-size="13" font-weight="bold" fill="#334155">AB = 1,5 m (OA = ?)</text>
+                </svg>`,
+                options: [
+                    { text: 'Cách đầu <span class="math">A</span> là <span class="math-num">0,6 m</span> và lực đè lên vai là <span class="math-num">500 N</span>.', isCorrect: true },
+                    { text: 'Cách đầu <span class="math">A</span> là <span class="math-num">0,9 m</span> và lực đè lên vai là <span class="math-num">500 N</span>.', isCorrect: false },
+                    { text: 'Cách đầu <span class="math">A</span> là <span class="math-num">0,6 m</span> và lực đè lên vai là <span class="math-num">100 N</span>.', isCorrect: false },
+                    { text: 'Cách đầu <span class="math">A</span> là <span class="math-num">0,75 m</span> và lực đè lên vai là <span class="math-num">500 N</span>.', isCorrect: false }
+                ],
+                explanation: '1) Lực đè lên vai bằng tổng hai trọng lực: <span class="math">F = P</span><sub class="math-num">1</sub> + <span class="math">P</span><sub class="math-num">2</sub> = <span class="math-num">300 + 200 = 500 N</span>.<br>2) Theo quy tắc moment đối với vai <span class="math">O</span>: <span class="math">P</span><sub class="math-num">1</sub> · <span class="math">OA = P</span><sub class="math-num">2</sub> · (<span class="math">1,5 - OA</span>) ⇒ <span class="math-num">300</span> · <span class="math">OA</span> = <span class="math-num">200</span> · (<span class="math-num">1,5</span> - <span class="math">OA</span>) ⇒ <span class="math-num">500</span> · <span class="math">OA = 300 ⇒ OA = </span><b><span class="math-num">0,6 m</span></b>.'
+            },
+            {
+                id: 'L2_05',
+                level: 2,
+                topic: 'Cân bằng vật rắn chịu nhiều lực',
+                question: 'Một thanh chắn đường đồng chất <span class="math">AB</span> dài <span class="math-num">4 m</span>, trọng lượng <span class="math">P = 150</span> <span class="math-num">N</span> có trục quay tại <span class="math">O</span> cách đầu <span class="math">A</span> một đoạn <span class="math">OA = 0,8</span> <span class="math-num">m</span>. Tại đầu <span class="math">A</span> người ta gắn một đối trọng nặng <span class="math">P</span><sub class="math-num">0</sub> = <span class="math-num">200 N</span>. Hỏi cần tác dụng vào đầu <span class="math">B</span> một lực <span class="math">F</span> thẳng đứng hướng xuống bằng bao nhiêu để giữ thanh cân bằng nằm ngang?',
+                svg: `<svg viewBox="0 0 410 155" class="w-full max-w-md mx-auto h-36">
+                    <defs>
+                        <marker id="arrB25" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb"/>
+                        </marker>
+                        <marker id="arrR25" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+                        </marker>
+                    </defs>
+                    <!-- Thanh AB = 4m (từ x=45 đến x=365, 80px = 1m) -->
+                    <rect x="45" y="56" width="320" height="8" rx="3" fill="#ef4444" stroke="#991b1b" stroke-width="1.5"/>
+                    <!-- Đối trọng ở A (x=45) -->
+                    <rect x="33" y="46" width="22" height="24" rx="3" fill="#475569"/>
+                    <line x1="45" y1="70" x2="45" y2="128" stroke="#2563eb" stroke-width="2.8" marker-end="url(#arrB25)"/>
+                    <text x="52" y="135" font-size="12" font-weight="bold" fill="#2563eb">P₀ = 200N</text>
+                    <!-- Trục quay O cách A 0.8m => x = 45 + 64 = 109 -->
+                    <polygon points="109,64 95,98 123,98" fill="#cbd5e1" stroke="#334155" stroke-width="2"/>
+                    <text x="109" y="45" text-anchor="middle" font-size="13" font-weight="bold">O (0,8m)</text>
+                    <!-- Trọng tâm G tại trung điểm (AG = 2m => x = 45 + 160 = 205) -->
+                    <circle cx="205" cy="60" r="3.5" fill="#fff"/>
+                    <line x1="205" y1="60" x2="205" y2="122" stroke="#dc2626" stroke-width="2.8" marker-end="url(#arrR25)"/>
+                    <text x="212" y="120" font-size="12" font-weight="bold" fill="#dc2626">P = 150N (G)</text>
+                    <!-- Lực F tại đầu B (x=365) -->
+                    <line x1="365" y1="60" x2="365" y2="122" stroke="#059669" stroke-width="2.8" marker-end="url(#arrR25)"/>
+                    <text x="335" y="138" font-size="13" font-weight="bold" fill="#dc2626">F = ? (B)</text>
+                </svg>`,
+                options: [
+                    { text: '<span class="math-num">6,25 N</span> (hoặc không cần kéo xuống vì bên phải đã thắng, cần nâng nhẹ <span class="math-num">6,25 N</span> hướng lên).', isCorrect: true },
+                    { text: '<span class="math-num">50 N</span>', isCorrect: false },
+                    { text: '<span class="math-num">25 N</span>', isCorrect: false },
+                    { text: '<span class="math-num">12,5 N</span>', isCorrect: false }
+                ],
+                explanation: 'Ta tính các cánh tay đòn đối với trục <span class="math">O</span>:<br>• <span class="math">OA = 0,8</span> <span class="math-num">m</span> ⇒ Moment của đối trọng <span class="math">M</span><sub class="math-num">0</sub> = <span class="math">P</span><sub class="math-num">0</sub> · <span class="math">OA = 200 · 0,8 = 160 N·m</span>.<br>• Trọng tâm <span class="math">G</span> cách <span class="math">A</span> là <span class="math-num">2 m</span> ⇒ <span class="math">OG = 2 - 0,8 = 1,2</span> <span class="math-num">m</span> ⇒ Moment trọng lực thanh <span class="math">M</span><sub class="math-num">P</sub> = <span class="math">150 · 1,2 = 180 N·m</span>.<br>• Độ lệch moment: <span class="math">ΔM = 180 - 160 = 20 N·m</span>. Vì đầu <span class="math">B</span> cách <span class="math">O</span> đoạn <span class="math">OB = 4 - 0,8 = 3,2</span> <span class="math-num">m</span>, nên độ lớn lực tại <span class="math">B</span> là: <span class="math">F = ΔM / OB = 20 / 3,2 = </span><b><span class="math-num">6,25 N</span></b>.'
+            },
+
+            // ================= CẤP ĐỘ 3: 5 CÂU (VẬN DỤNG CAO 9 - 10 ĐIỂM) =================
+            {
+                id: 'L3_01',
+                level: 3,
+                topic: 'Đồ thị Moment lực có đường gióng số liệu',
+                question: 'Khảo sát sự phụ thuộc của moment lực <span class="math">M</span> (<span class="math-num">N·m</span>) vào khoảng cách <span class="math">d</span> (<span class="math-num">m</span>) khi một lực <span class="vec">F</span> không đổi vuông góc với thanh và một lực cản ngược chiều tạo moment ban đầu <span class="math">M</span><sub class="math-num">0</sub>, người ta thu được đồ thị thực nghiệm có đường gióng như hình vẽ. Độ lớn của lực <span class="math">F</span> là:',
+                svg: `<svg viewBox="0 0 400 205" class="w-full max-w-md mx-auto h-48">
+                    <defs>
+                        <marker id="arrAx" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#0f172a"/>
+                        </marker>
+                    </defs>
+                    <!-- Nền lưới đồ thị -->
+                    <rect x="55" y="20" width="290" height="150" fill="#f8fafc" stroke="#e2e8f0"/>
+                    <!-- Trục tọa độ O (x=65, y=160) -->
+                    <line x1="65" y1="175" x2="65" y2="18" stroke="#0f172a" stroke-width="2" marker-end="url(#arrAx)"/>
+                    <line x1="50" y1="160" x2="345" y2="160" stroke="#0f172a" stroke-width="2" marker-end="url(#arrAx)"/>
+                    <text x="48" y="26" font-size="13" font-weight="bold" fill="#0f172a">M (N·m)</text>
+                    <text x="320" y="182" font-size="13" font-weight="bold" fill="#0f172a">d (m)</text>
+                    <text x="52" y="174" font-size="12" font-weight="bold">O</text>
+
+                    <!-- Điểm 1: d1 = 0.2 m (x=135), M1 = 15 N.m (y=120) -->
+                    <line x1="135" y1="160" x2="135" y2="120" stroke="#2563eb" stroke-width="1.6" stroke-dasharray="4,3"/>
+                    <line x1="65" y1="120" x2="135" y2="120" stroke="#2563eb" stroke-width="1.6" stroke-dasharray="4,3"/>
+                    <text x="135" y="176" text-anchor="middle" font-size="12" font-weight="bold" fill="#1d4ed8">0,2</text>
+                    <text x="56" y="124" text-anchor="end" font-size="12" font-weight="bold" fill="#1d4ed8">15</text>
+
+                    <!-- Điểm 2: d2 = 0.6 m (x=275), M2 = 45 N.m (y=40) -->
+                    <line x1="275" y1="160" x2="275" y2="40" stroke="#dc2626" stroke-width="1.6" stroke-dasharray="4,3"/>
+                    <line x1="65" y1="40" x2="275" y2="40" stroke="#dc2626" stroke-width="1.6" stroke-dasharray="4,3"/>
+                    <text x="275" y="176" text-anchor="middle" font-size="12" font-weight="bold" fill="#dc2626">0,6</text>
+                    <text x="56" y="44" text-anchor="end" font-size="12" font-weight="bold" fill="#dc2626">45</text>
+
+                    <!-- Đường biểu diễn thẳng đi qua (65,160), (135,120), (275,40) -->
+                    <line x1="65" y1="160" x2="305" y2="22.8" stroke="#059669" stroke-width="3"/>
+                    <circle cx="135" cy="120" r="4.5" fill="#2563eb"/>
+                    <circle cx="275" cy="40" r="4.5" fill="#dc2626"/>
+                </svg>`,
+                options: [
+                    { text: '<span class="math-num">75 N</span>', isCorrect: true },
+                    { text: '<span class="math-num">50 N</span>', isCorrect: false },
+                    { text: '<span class="math-num">90 N</span>', isCorrect: false },
+                    { text: '<span class="math-num">30 N</span>', isCorrect: false }
+                ],
+                explanation: 'Từ các đường gióng trên đồ thị, ta đọc chính xác 2 điểm:<br>• Tại <span class="math">d</span><sub class="math-num">1</sub> = <span class="math-num">0,2 m</span> thì <span class="math">M</span><sub class="math-num">1</sub> = <span class="math-num">15 N·m</span>.<br>• Tại <span class="math">d</span><sub class="math-num">2</sub> = <span class="math-num">0,6 m</span> thì <span class="math">M</span><sub class="math-num">2</sub> = <span class="math-num">45 N·m</span>.<br>Độ lớn lực <span class="math">F</span> chính là hệ số góc của đồ thị: <span class="math">F = ΔM / Δd = (45 - 15) / (0,6 - 0,2) = 30 / 0,4 = </span><b><span class="math-num">75 N</span></b>.'
+            },
+            {
+                id: 'L3_02',
+                level: 3,
+                topic: 'Thanh bản lề giữ bằng dây cáp nghiêng 30°',
+                question: 'Một thanh đồng chất <span class="math">OA</span> có trọng lượng <span class="math">P = 80</span> <span class="math-num">N</span>, đầu <span class="math">O</span> gắn vào tường nhờ bản lề, đầu <span class="math">A</span> được giữ nằm ngang nhờ một dây cáp <span class="math">AB</span> hợp với thanh <span class="math">OA</span> một góc <span class="math">α = 30°</span>. Tại đầu <span class="math">A</span> còn treo một đèn tín hiệu nặng <span class="math">P</span><sub class="math-num">1</sub> = <span class="math-num">60 N</span>. Lực căng <span class="math">T</span> của dây cáp <span class="math">AB</span> có độ lớn bằng:',
+                svg: `<svg viewBox="0 0 400 175" class="w-full max-w-md mx-auto h-44">
+                    <defs>
+                        <marker id="arrR32" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+                        </marker>
+                        <marker id="arrB32" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb"/>
+                        </marker>
+                    </defs>
+                    <!-- Tường thẳng đứng -->
+                    <rect x="45" y="15" width="12" height="145" fill="#64748b"/>
+                    <!-- Thanh OA nằm ngang (từ x=57 đến x=277, y=105) -->
+                    <rect x="57" y="101" width="220" height="8" fill="#475569"/>
+                    <circle cx="57" cy="105" r="5" fill="#0f172a"/>
+                    <text x="33" y="110" font-size="13" font-weight="bold">O</text>
+                    <!-- Dây cáp AB từ A(277,105) đến B(57,25) -->
+                    <line x1="277" y1="105" x2="57" y2="25" stroke="#0f172a" stroke-width="2"/>
+                    <text x="64" y="26" font-size="13" font-weight="bold">B</text>
+                    <text x="285" y="108" font-size="13" font-weight="bold">A</text>
+                    <!-- Vector lực căng T dọc theo AB -->
+                    <line x1="277" y1="105" x2="195" y2="75.2" stroke="#2563eb" stroke-width="3.2" marker-end="url(#arrB32)"/>
+                    <text x="200" y="66" font-size="15" font-weight="bold" font-family="Times New Roman" font-style="italic" fill="#2563eb">T⃗</text>
+                    <!-- Góc 30 độ tại A -->
+                    <path d="M 232 105 A 45 45 0 0 1 236 90" fill="none" stroke="#b45309" stroke-width="2"/>
+                    <text x="196" y="100" font-size="12" font-weight="bold" fill="#b45309">α=30°</text>
+                    <!-- Trọng lực thanh P = 80N tại trung điểm G(167,105) -->
+                    <circle cx="167" cy="105" r="3.5" fill="#dc2626"/>
+                    <line x1="167" y1="105" x2="167" y2="152" stroke="#dc2626" stroke-width="2.6" marker-end="url(#arrR32)"/>
+                    <text x="115" y="152" font-size="12" font-weight="bold" fill="#dc2626">P = 80 N</text>
+                    <!-- Trọng lực vật P1 = 60N tại A(277,105) -->
+                    <line x1="277" y1="105" x2="277" y2="158" stroke="#dc2626" stroke-width="2.6" marker-end="url(#arrR32)"/>
+                    <text x="286" y="152" font-size="12" font-weight="bold" fill="#dc2626">P₁ = 60 N</text>
+                </svg>`,
+                options: [
+                    { text: '<span class="math-num">200 N</span>', isCorrect: true },
+                    { text: '<span class="math-num">140 N</span>', isCorrect: false },
+                    { text: '<span class="math-num">280 N</span>', isCorrect: false },
+                    { text: '<span class="math-num">100 N</span>', isCorrect: false }
+                ],
+                explanation: 'Chọn trục quay tại bản lề <span class="math">O</span>, gọi chiều dài thanh là <span class="math">l</span>:<br>• Cánh tay đòn của trọng lực thanh <span class="math">P</span> là <span class="math">d</span><sub class="math-num">P</sub> = <span class="math">l / 2</span>.<br>• Cánh tay đòn của vật <span class="math">P</span><sub class="math-num">1</sub> là <span class="math">d</span><sub class="math-num">1</sub> = <span class="math">l</span>.<br>• Cánh tay đòn của lực căng <span class="math">T</span> là <span class="math">d</span><sub class="math-num">T</sub> = <span class="math">l ·</span> sin<span class="math-num">30° = 0,5</span><span class="math">l</span>.<br>Áp dụng quy tắc moment quanh <span class="math">O</span>:<br><span class="math">T · (0,5l) = P · (0,5l) + P</span><sub class="math-num">1</sub> · <span class="math">l ⇒ 0,5T = 80 · 0,5 + 60 = 100 ⇒ T = </span><b><span class="math-num">200 N</span></b>.'
+            },
+            {
+                id: 'L3_03',
+                level: 3,
+                topic: 'Bài toán cái thang tựa tường nhẵn',
+                question: 'Một chiếc thang đồng chất có trọng lượng <span class="math">P = 200</span> <span class="math-num">N</span> tựa vào bức tường thẳng đứng nhẵn bóng (bỏ qua ma sát ở tường), chân thang đặt trên sàn ngang nhám và hợp với sàn góc <span class="math">α = 60°</span>. Để thang đứng yên cân bằng, lực ma sát nghỉ <span class="math">F</span><sub class="math-num">ms</sub> ở chân thang có độ lớn bằng (lấy <span class="math-num">√3 ≈ 1,73</span>):',
+                svg: `<svg viewBox="0 0 400 180" class="w-full max-w-md mx-auto h-44">
+                    <defs>
+                        <marker id="arrR33" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+                        </marker>
+                        <marker id="arrB33" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb"/>
+                        </marker>
+                    </defs>
+                    <!-- Tường đứng (x=70) và Sàn ngang (y=150) -->
+                    <rect x="58" y="15" width="12" height="135" fill="#94a3b8"/>
+                    <rect x="58" y="150" width="280" height="10" fill="#94a3b8"/>
+                    <!-- Thang AB từ B(70, 28) đến A(155, 150) -->
+                    <line x1="70" y1="28" x2="155" y2="150" stroke="#b45309" stroke-width="6" stroke-linecap="round"/>
+                    <!-- Phản lực tường N2 tại B(70,28) vuông góc tường -->
+                    <line x1="70" y1="28" x2="130" y2="28" stroke="#2563eb" stroke-width="2.8" marker-end="url(#arrB33)"/>
+                    <text x="136" y="32" font-size="13" font-weight="bold" fill="#2563eb">N⃗₂ (tường nhẵn)</text>
+                    <!-- Trọng lực P tại G(112.5, 89) -->
+                    <circle cx="112.5" cy="89" r="4" fill="#dc2626"/>
+                    <line x1="112.5" y1="89" x2="112.5" y2="142" stroke="#dc2626" stroke-width="2.8" marker-end="url(#arrR33)"/>
+                    <text x="118" y="128" font-size="12" font-weight="bold" fill="#dc2626">P = 200N</text>
+                    <!-- Lực tại chân thang A(155,150): N1 hướng lên, Fms hướng vào tường -->
+                    <line x1="155" y1="150" x2="155" y2="98" stroke="#059669" stroke-width="2.6" marker-end="url(#arrB33)"/>
+                    <text x="162" y="106" font-size="12" font-weight="bold" fill="#059669">N⃗₁</text>
+                    <line x1="155" y1="150" x2="102" y2="150" stroke="#dc2626" stroke-width="3" marker-end="url(#arrR33)"/>
+                    <text x="95" y="172" font-size="13" font-weight="bold" fill="#dc2626">F⃗ms = ?</text>
+                    <text x="165" y="145" font-size="12" font-weight="bold" fill="#92400e">α = 60°</text>
+                </svg>`,
+                options: [
+                    { text: '<span class="math-num">57,7 N</span>', isCorrect: true },
+                    { text: '<span class="math-num">100 N</span>', isCorrect: false },
+                    { text: '<span class="math-num">173,2 N</span>', isCorrect: false },
+                    { text: '<span class="math-num">86,6 N</span>', isCorrect: false }
+                ],
+                explanation: '1) Xét trục quay tại chân thang <span class="math">A</span> (triệt tiêu moment của <span class="vec">N</span><sub class="math-num">1</sub> và <span class="vec">F</span><sub class="math-num">ms</sub>):<br><span class="math">N</span><sub class="math-num">2</sub> · (<span class="math">l ·</span> sin<span class="math-num">60°</span>) = <span class="math">P · (0,5l ·</span> cos<span class="math-num">60°</span>) ⇒ <span class="math">N</span><sub class="math-num">2</sub> = <span class="math">P</span> / (<span class="math-num">2 ·</span> tan<span class="math-num">60°</span>) = <span class="math-num">200 / (2√3) ≈ 57,7 N</span>.<br>2) Điều kiện cân bằng lực theo phương ngang: <span class="math">F</span><sub class="math-num">ms</sub> = <span class="math">N</span><sub class="math-num">2</sub> ≈ <b><span class="math-num">57,7 N</span></b>.'
+            },
+            {
+                id: 'L3_04',
+                level: 3,
+                topic: 'Đồ thị Moment phụ thuộc góc hợp lực α',
+                question: 'Tác dụng một lực <span class="vec">F</span> có độ lớn không đổi vào đầu mút <span class="math">A</span> của thanh <span class="math">OA</span> dài <span class="math">l = 0,5</span> <span class="math-num">m</span> quay quanh <span class="math">O</span>. Khi thay đổi góc <span class="math">α</span> hợp bởi vectơ lực <span class="vec">F</span> và thanh <span class="math">OA</span>, đồ thị phụ thuộc của moment <span class="math">M</span> theo <span class="math">α</span> được ghi lại với đường gióng số liệu như hình. Giá trị của <span class="math">M</span><sub class="math-num">1</sub> tại <span class="math">α = 30°</span> và độ lớn lực <span class="math">F</span> lần lượt là:',
+                svg: `<svg viewBox="0 0 400 200" class="w-full max-w-md mx-auto h-48">
+                    <defs>
+                        <marker id="arrAx4" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#0f172a"/>
+                        </marker>
+                    </defs>
+                    <rect x="55" y="18" width="295" height="145" fill="#f8fafc" stroke="#e2e8f0"/>
+                    <!-- Trục tọa độ O(65, 155) -->
+                    <line x1="65" y1="170" x2="65" y2="15" stroke="#0f172a" stroke-width="2" marker-end="url(#arrAx4)"/>
+                    <line x1="50" y1="155" x2="350" y2="155" stroke="#0f172a" stroke-width="2" marker-end="url(#arrAx4)"/>
+                    <text x="48" y="24" font-size="12" font-weight="bold">M (N·m)</text>
+                    <text x="325" y="176" font-size="12" font-weight="bold">α (độ)</text>
+                    <text x="53" y="168" font-size="12" font-weight="bold">0</text>
+
+                    <!-- Đường cong hình sin M = Mmax.sin(α) từ x=65 (0 độ) đến x=305 (180 độ), đỉnh tại x=185 (90 độ, y=45) -->
+                    <path d="M 65 155 Q 125 45, 185 45 Q 245 45, 305 155" fill="none" stroke="#7c3aed" stroke-width="3"/>
+
+                    <!-- Đỉnh 90 độ: x=185, y=45 => Mmax = 40 N.m -->
+                    <line x1="185" y1="155" x2="185" y2="45" stroke="#dc2626" stroke-width="1.6" stroke-dasharray="4,3"/>
+                    <line x1="65" y1="45" x2="185" y2="45" stroke="#dc2626" stroke-width="1.6" stroke-dasharray="4,3"/>
+                    <circle cx="185" cy="45" r="4.5" fill="#dc2626"/>
+                    <text x="185" y="172" text-anchor="middle" font-size="12" font-weight="bold" fill="#dc2626">90°</text>
+                    <text x="56" y="49" text-anchor="end" font-size="12" font-weight="bold" fill="#dc2626">40</text>
+
+                    <!-- Điểm 30 độ: x=105, y=100 => M1 = ? -->
+                    <line x1="105" y1="155" x2="105" y2="100" stroke="#2563eb" stroke-width="1.6" stroke-dasharray="4,3"/>
+                    <line x1="65" y1="100" x2="105" y2="100" stroke="#2563eb" stroke-width="1.6" stroke-dasharray="4,3"/>
+                    <circle cx="105" cy="100" r="4.5" fill="#2563eb"/>
+                    <text x="105" y="172" text-anchor="middle" font-size="12" font-weight="bold" fill="#2563eb">30°</text>
+                    <text x="56" y="104" text-anchor="end" font-size="12" font-weight="bold" fill="#2563eb">M₁=?</text>
+                    <text x="305" y="172" text-anchor="middle" font-size="12" font-weight="bold">180°</text>
+                </svg>`,
+                options: [
+                    { text: '<span class="math">M</span><sub class="math-num">1</sub> = <span class="math-num">20 N·m</span> và <span class="math">F = 80</span> <span class="math-num">N</span>.', isCorrect: true },
+                    { text: '<span class="math">M</span><sub class="math-num">1</sub> = <span class="math-num">20 N·m</span> và <span class="math">F = 40</span> <span class="math-num">N</span>.', isCorrect: false },
+                    { text: '<span class="math">M</span><sub class="math-num">1</sub> = <span class="math-num">13,3 N·m</span> và <span class="math">F = 80</span> <span class="math-num">N</span>.', isCorrect: false },
+                    { text: '<span class="math">M</span><sub class="math-num">1</sub> = <span class="math-num">34,6 N·m</span> và <span class="math">F = 20</span> <span class="math-num">N</span>.', isCorrect: false }
+                ],
+                explanation: 'Ta có biểu thức: <span class="math">M = F · l ·</span> sin<span class="math">α = M</span><sub class="math-num">max</sub> · sin<span class="math">α</span>.<br>• Từ đường gióng tại đỉnh <span class="math">α = 90°</span>: <span class="math">M</span><sub class="math-num">max</sub> = <span class="math">F · l = 40</span> <span class="math-num">N·m</span> ⇒ <span class="math">F = 40 / 0,5 = </span><b><span class="math-num">80 N</span></b>.<br>• Tại <span class="math">α = 30°</span>: <span class="math">M</span><sub class="math-num">1</sub> = <span class="math">M</span><sub class="math-num">max</sub> · sin<span class="math-num">30° = 40 · 0,5 = </span><b><span class="math-num">20 N·m</span></b>.'
+            },
+            {
+                id: 'L3_05',
+                level: 3,
+                topic: 'Cực trị Moment - Đẩy bánh xe vượt bậc thềm',
+                question: 'Một bánh xe đồng chất bán kính <span class="math">R = 50</span> <span class="math-num">cm</span>, trọng lượng <span class="math">P = 300</span> <span class="math-num">N</span> cần được kéo vượt qua một bậc thềm cao <span class="math">h = 10</span> <span class="math-num">cm</span>. Nếu tác dụng lực <span class="vec">F</span> đặt tại tâm <span class="math">O</span> của bánh xe theo phương nằm ngang thì cần lực <span class="math">F</span> tối thiểu bằng bao nhiêu để bánh xe bắt đầu vượt qua mép bậc thềm <span class="math">I</span>?',
+                svg: `<svg viewBox="0 0 400 185" class="w-full max-w-md mx-auto h-44">
+                    <defs>
+                        <marker id="arrR35" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626"/>
+                        </marker>
+                        <marker id="arrB35" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb"/>
+                        </marker>
+                    </defs>
+                    <!-- Mặt sàn (y=150) và Bậc thềm cao h (từ x=215, y=130) -->
+                    <line x1="30" y1="150" x2="215" y2="150" stroke="#475569" stroke-width="3"/>
+                    <rect x="215" y="128" width="145" height="24" fill="#cbd5e1" stroke="#334155" stroke-width="2"/>
+                    <!-- Bánh xe tâm O(165, 92), R = 58px -->
+                    <circle cx="165" cy="92" r="58" fill="#eff6ff" stroke="#1e293b" stroke-width="4"/>
+                    <circle cx="165" cy="92" r="4.5" fill="#0f172a"/>
+                    <text x="150" y="88" font-size="14" font-weight="bold">O</text>
+                    <!-- Điểm tựa mép bậc thềm I(215, 128) -->
+                    <circle cx="215" cy="128" r="4.5" fill="#dc2626"/>
+                    <text x="222" y="124" font-size="14" font-weight="bold" fill="#dc2626">I (trục quay)</text>
+                    <!-- Bán kính OI = R -->
+                    <line x1="165" y1="92" x2="215" y2="128" stroke="#64748b" stroke-width="1.8" stroke-dasharray="4,2"/>
+                    <!-- Đường gióng vuông góc từ O xuống trục đứng qua I và ngang qua I -->
+                    <line x1="165" y1="128" x2="215" y2="128" stroke="#2563eb" stroke-width="1.8" stroke-dasharray="3,2"/>
+                    <!-- Trọng lực P = 300N -->
+                    <line x1="165" y1="92" x2="165" y2="168" stroke="#dc2626" stroke-width="2.8" marker-end="url(#arrR35)"/>
+                    <text x="110" y="168" font-size="12" font-weight="bold" fill="#dc2626">P = 300 N</text>
+                    <!-- Lực kéo ngang F tại tâm O -->
+                    <line x1="165" y1="92" x2="255" y2="92" stroke="#2563eb" stroke-width="3" marker-end="url(#arrB35)"/>
+                    <text x="260" y="96" font-size="14" font-weight="bold" fill="#2563eb">F⃗ ngang = ?</text>
+                    <!-- Độ cao h = 10cm -->
+                    <text x="295" y="145" font-size="12" font-weight="bold" fill="#334155">h = 10 cm, R = 50 cm</text>
+                </svg>`,
+                options: [
+                    { text: '<span class="math-num">225 N</span>', isCorrect: true },
+                    { text: '<span class="math-num">400 N</span>', isCorrect: false },
+                    { text: '<span class="math-num">180 N</span>', isCorrect: false },
+                    { text: '<span class="math-num">300 N</span>', isCorrect: false }
+                ],
+                explanation: 'Xét trục quay tức thời tại mép bậc thềm <span class="math">I</span>:<br>• Cánh tay đòn của lực ngang <span class="vec">F</span> đối với <span class="math">I</span> là: <span class="math">d</span><sub class="math-num">F</sub> = <span class="math">R - h = 50 - 10 = 40</span> <span class="math-num">cm</span>.<br>• Cánh tay đòn của trọng lực <span class="vec">P</span> đối với <span class="math">I</span> là: <span class="math">d</span><sub class="math-num">P</sub> = √(<span class="math">R</span><sup class="math-num">2</sup> - (<span class="math">R - h</span>)<sup class="math-num">2</sup>) = √(<span class="math-num">50</span><sup class="math-num">2</sup> - <span class="math-num">40</span><sup class="math-num">2</sup>) = <span class="math-num">30 cm</span>.<br>• Điều kiện bắt đầu vượt bậc thềm: <span class="math">F · d</span><sub class="math-num">F</sub> = <span class="math">P · d</span><sub class="math-num">P</sub> ⇒ <span class="math">F = 300 · (30 / 40) = </span><b><span class="math-num">225 N</span></b>.'
+            }
+        ];
+
+        /********************************************************************
+         * 3. QUẢN LÝ TRẠNG THÁI & KIỂM SOÁT HỌC SINH LÀM ĐỦ 3 LẦN 12/12 CÂU
+         ********************************************************************/
+        const STORAGE_KEY = 'VL10_BAI21_MOMENT_MASTERY_V1';
+        let currentLevel = 1;
+        let level1PerfectCount = 0; // Số lần đạt 12/12 ở Cấp độ 1
+        let teacherModeUnlocked = false;
+        let activeQuestions = []; // Danh sách câu hỏi đã đảo trong lượt hiện tại
+        let userAnswers = {}; // { questionId: selectedOptionIndex }
+
+        // Load dữ liệu từ localStorage
+        function loadProgress() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    level1PerfectCount = Number(parsed.level1PerfectCount) || 0;
+                }
+            } catch (e) {
+                level1PerfectCount = 0;
+            }
+        }
+
+        function saveProgress() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    level1PerfectCount
+                }));
+            } catch (e) {}
+        }
+
+        function isUnlocked(level) {
+            if (level === 1) return true;
+            return teacherModeUnlocked || level1PerfectCount >= 3;
+        }
+
+        function toggleTeacherMode() {
+            teacherModeUnlocked = !teacherModeUnlocked;
+            const btn = document.getElementById('teacher-mode-btn');
+            if (teacherModeUnlocked) {
+                btn.className = 'px-2.5 py-2 rounded-xl font-bold text-xs bg-emerald-600 text-white border border-emerald-700 shadow-sm transition';
+                btn.innerHTML = '👩‍🏫 Đã mở khóa GV';
+                showFunToast(true, "Chế độ Giáo viên: Đã mở khóa Cấp độ 2 & 3 để kiểm tra đề!");
+            } else {
+                btn.className = 'px-2.5 py-2 rounded-xl font-semibold text-xs bg-slate-100 text-slate-600 border border-slate-300 hover:bg-slate-200 transition';
+                btn.innerHTML = '👩‍🏫 GV Mở khóa';
+                if (currentLevel > 1 && level1PerfectCount < 3) {
+                    selectLevel(1);
+                }
+            }
+            updateHeaderUI();
+        }
+
+        function resetAllProgress() {
+            level1PerfectCount = 0;
+            teacherModeUnlocked = false;
+            saveProgress();
+            const btn = document.getElementById('teacher-mode-btn');
+            btn.className = 'px-2.5 py-2 rounded-xl font-semibold text-xs bg-slate-100 text-slate-600 border border-slate-300 hover:bg-slate-200 transition';
+            btn.innerHTML = '👩‍🏫 GV Mở khóa';
+            selectLevel(1);
+            showFunToast(true, "Đã đặt lại tiến độ từ đầu! Hãy chinh phục 3 ngôi sao Cấp độ 1 nhé!");
+        }
+
+        // Thuật toán trộn ngẫu nhiên Fisher-Yates (Đảo cả câu hỏi lẫn vị trí 4 đáp án A, B, C, D)
+        function shuffleArray(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        // Khởi tạo / Làm lại cấp độ với bộ câu hỏi và đáp án đảo ngẫu nhiên
+        function startLevelSession(level) {
+            currentLevel = level;
+            userAnswers = {};
+
+            // Lọc câu hỏi theo cấp độ và đảo thứ tự câu hỏi
+            const rawQuestions = QUESTION_BANK.filter(q => q.level === level);
+            const shuffledQuestions = shuffleArray(rawQuestions);
+
+            // Đảo vị trí 4 đáp án A, B, C, D trong từng câu
+            activeQuestions = shuffledQuestions.map(q => ({
+                ...q,
+                shuffledOptions: shuffleArray(q.options)
+            }));
+
+            document.getElementById('locked-warning').classList.add('hidden');
+            document.getElementById('level-summary-box').classList.add('hidden');
+            document.getElementById('level-summary-bottom').classList.add('hidden');
+
+            updateHeaderUI();
+            updateBannerUI();
+            renderQuestions();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function selectLevel(level) {
+            if (!isUnlocked(level)) {
+                playSoundWrong();
+                const warn = document.getElementById('locked-warning');
+                document.getElementById('locked-warning-count').textContent = `${Math.min(level1PerfectCount, 3)}/3`;
+                warn.classList.remove('hidden');
+                warn.classList.remove('shake-anim');
+                void warn.offsetWidth;
+                warn.classList.add('shake-anim');
+                showFunToast(false, `Cần đạt 12/12 câu Cấp độ 1 đủ 3 lần mới mở khóa Cấp độ ${level}! (Hiện tại: ${level1PerfectCount}/3 lần)`);
+                return;
+            }
+            startLevelSession(level);
+        }
+
+        function restartCurrentLevel() {
+            playSoundCorrect(2);
+            startLevelSession(currentLevel);
+            showFunToast(true, "Đã đảo vị trí câu hỏi và đáp án mới! Làm bài thôi nào! 🔀");
+        }
+
+        /********************************************************************
+         * 4. CẬP NHẬT GIAO DIỆN HEADER, HUY HIỆU 3 LẦN & CÂU HỎI
+         ********************************************************************/
+        function updateHeaderUI() {
+            // Render 3 ngôi sao tiến độ Cấp độ 1
+            const badgeContainer = document.getElementById('mastery-badges');
+            let badgesHTML = '';
+            for (let i = 1; i <= 3; i++) {
+                const achieved = level1PerfectCount >= i;
+                badgesHTML += `
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-extrabold border ${
+                        achieved
+                            ? 'bg-amber-100 text-amber-800 border-amber-400 shadow-sm'
+                            : 'bg-slate-100 text-slate-400 border-slate-300'
+                    }">
+                        <span>${achieved ? '⭐' : '☆'}</span>
+                        <span>Lần ${i}</span>
+                    </span>
+                `;
+            }
+            if (level1PerfectCount >= 3) {
+                badgesHTML += `<span class="text-xs font-extrabold text-emerald-600 ml-1">🔓 Đã mở khóa Cấp 2 & 3!</span>`;
+            }
+            badgeContainer.innerHTML = badgesHTML;
+
+            // Thống kê câu đã làm & câu đúng
+            const total = activeQuestions.length;
+            const answeredCount = Object.keys(userAnswers).length;
+            let correctCount = 0;
+            activeQuestions.forEach(q => {
+                const chosenIdx = userAnswers[q.id];
+                if (chosenIdx !== undefined && q.shuffledOptions[chosenIdx]?.isCorrect) {
+                    correctCount++;
+                }
+            });
+            const percent = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+
+            document.getElementById('stat-answered').textContent = `${answeredCount}/${total}`;
+            document.getElementById('stat-correct').textContent = `${correctCount}/${total}`;
+            document.getElementById('stat-score').textContent = `${percent}%`;
+
+            // Cập nhật trạng thái 3 Tab cấp độ
+            const unlocked23 = isUnlocked(2);
+            document.getElementById('lock-icon-2').textContent = unlocked23 ? '🔓' : '🔒';
+            document.getElementById('lock-icon-3').textContent = unlocked23 ? '🔓' : '🔒';
+
+            [1, 2, 3].forEach(lvl => {
+                const tab = document.getElementById(`tab-level-${lvl}`);
+                if (currentLevel === lvl) {
+                    tab.className = 'flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2.5 px-2 rounded-xl font-extrabold text-xs sm:text-sm border-2 bg-blue-600 text-white border-blue-600 shadow-md transition';
+                } else if (isUnlocked(lvl)) {
+                    tab.className = 'flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2.5 px-2 rounded-xl font-bold text-xs sm:text-sm border-2 bg-white text-slate-700 border-slate-200 hover:border-blue-400 hover:bg-blue-50 transition';
+                } else {
+                    tab.className = 'flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2.5 px-2 rounded-xl font-semibold text-xs sm:text-sm border-2 bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed transition';
+                }
+            });
+        }
+
+        function updateBannerUI() {
+            const badge = document.getElementById('banner-badge');
+            const title = document.getElementById('banner-title');
+            const desc = document.getElementById('banner-desc');
+            const banner = document.getElementById('level-banner');
+
+            if (currentLevel === 1) {
+                banner.className = 'mb-5 p-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3';
+                badge.textContent = '🌱 Cấp độ 1 • Mức 5-6 điểm (12 câu)';
+                title.textContent = 'Nhận biết Công thức, Lý thuyết & Bài toán 1 bước';
+                desc.textContent = `Hoàn thành đúng 12/12 câu đủ 3 lần để nhớ chắc kiến thức và mở khóa Cấp độ 2, 3. (Đã đạt: ${level1PerfectCount}/3 lần 12/12).`;
+            } else if (currentLevel === 2) {
+                banner.className = 'mb-5 p-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3';
+                badge.textContent = '⚡ Cấp độ 2 • Mức 7-8 điểm (5 câu)';
+                title.textContent = 'Vận dụng Quy tắc Moment, Đòn bẩy & Lực xiên góc';
+                desc.textContent = 'Áp dụng điều kiện cân bằng cho thanh có khối lượng, bập bênh và bài toán thực tế.';
+            } else {
+                banner.className = 'mb-5 p-4 rounded-2xl bg-gradient-to-r from-purple-600 to-rose-600 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3';
+                badge.textContent = '🔥 Cấp độ 3 • Mức 9-10 điểm (5 câu)';
+                title.textContent = 'Vận dụng cao: Đồ thị có đường gióng, Thang tựa tường & Cực trị';
+                desc.textContent = 'Thử thách điểm 9 - 10 với các bài toán phân tích lực, đọc đồ thị thực nghiệm và tìm lực tối thiểu.';
+            }
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            const optionLetters = ['A', 'B', 'C', 'D'];
+
+            container.innerHTML = activeQuestions.map((q, qIdx) => {
+                return `
+                    <article id="card-${q.id}" class="bg-white rounded-2xl border-2 border-slate-200 shadow-sm overflow-hidden transition-all duration-200">
+                        <!-- Đầu thẻ câu hỏi -->
+                        <div class="bg-slate-50 px-4 sm:px-6 py-3 border-b border-slate-200 flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="px-3 py-1 rounded-lg bg-blue-600 text-white font-extrabold text-xs sm:text-sm">
+                                    Câu ${qIdx + 1}/${activeQuestions.length}
+                                </span>
+                                <span class="text-xs font-semibold text-slate-600 bg-slate-200/80 px-2.5 py-1 rounded-md">
+                                    ${q.topic}
+                                </span>
+                            </div>
+                            <span id="status-badge-${q.id}" class="text-xs font-bold text-slate-400">
+                                Chưa chọn
+                            </span>
+                        </div>
+
+                        <!-- Nội dung câu hỏi & Hình minh họa SVG -->
+                        <div class="p-4 sm:p-6">
+                            <div class="text-slate-900 font-semibold text-sm sm:text-base leading-relaxed mb-4">
+                                ${q.question}
+                            </div>
+
+                            <!-- Khung hình minh họa SVG -->
+                            <div class="my-4 p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center">
+                                ${q.svg}
+                            </div>
+
+                            <!-- 4 Phương án lựa chọn (Tích chọn hiển thị Đúng/Sai ngay) -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                                ${q.shuffledOptions.map((opt, optIdx) => `
+                                    <button
+                                        id="btn-${q.id}-${optIdx}"
+                                        onclick="handleSelectOption('${q.id}', ${optIdx})"
+                                        class="option-btn text-left p-3.5 rounded-xl border-2 border-slate-200 bg-white flex items-start gap-3 group"
+                                    >
+                                        <span id="letter-${q.id}-${optIdx}" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 font-extrabold text-sm flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition">
+                                            ${optionLetters[optIdx]}
+                                        </span>
+                                        <span class="text-sm sm:text-base font-medium text-slate-800 pt-0.5 leading-snug">
+                                            ${opt.text}
+                                        </span>
+                                    </button>
+                                `).join('')}
+                            </div>
+
+                            <!-- Khung Phản hồi & Giải thích chi tiết (Hiện ngay khi học sinh tích chọn) -->
+                            <div id="feedback-${q.id}" class="hidden mt-4 p-4 rounded-xl border text-sm leading-relaxed">
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        /********************************************************************
+         * 5. XỬ LÝ TÍCH CHỌN ĐÁP ÁN TỨC THÌ (KHÔNG CẦN NÚT KIỂM TRA)
+         ********************************************************************/
+        function handleSelectOption(questionId, selectedIdx) {
+            // Nếu câu này đã trả lời rồi thì không cho chọn lại trong lượt này
+            if (userAnswers[questionId] !== undefined) return;
+
+            const questionObj = activeQuestions.find(q => q.id === questionId);
+            if (!questionObj) return;
+
+            userAnswers[questionId] = selectedIdx;
+            const isCorrect = questionObj.shuffledOptions[selectedIdx].isCorrect;
+            const optionLetters = ['A', 'B', 'C', 'D'];
+
+            // Phát âm thanh & hiệu ứng thẻ
+            const card = document.getElementById(`card-${questionId}`);
+            const statusBadge = document.getElementById(`status-badge-${questionId}`);
+            const feedbackBox = document.getElementById(`feedback-${questionId}`);
+
+            if (isCorrect) {
+                playSoundCorrect();
+                showFunToast(true);
+                card.classList.remove('border-slate-200');
+                card.classList.add('border-emerald-400', 'pop-anim');
+                statusBadge.className = 'text-xs font-extrabold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full';
+                statusBadge.innerHTML = '✓ Chính xác';
+            } else {
+                playSoundWrong();
+                showFunToast(false);
+                card.classList.remove('border-slate-200');
+                card.classList.add('border-rose-400', 'shake-anim');
+                statusBadge.className = 'text-xs font-extrabold text-rose-700 bg-rose-100 px-2.5 py-1 rounded-full';
+                statusBadge.innerHTML = '✗ Chưa đúng';
+            }
+
+            // Tô màu các nút đáp án ngay lập tức & Khóa các nút của câu hỏi này
+            questionObj.shuffledOptions.forEach((opt, idx) => {
+                const btn = document.getElementById(`btn-${questionId}-${idx}`);
+                const letter = document.getElementById(`letter-${questionId}-${idx}`);
+                btn.disabled = true;
+
+                if (opt.isCorrect) {
+                    // Đáp án đúng luôn sáng màu xanh lá
+                    btn.className = 'text-left p-3.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 flex items-start gap-3 shadow-sm';
+                    letter.className = 'w-7 h-7 rounded-lg bg-emerald-600 text-white font-extrabold text-sm flex items-center justify-center shrink-0';
+                    letter.textContent = '✓';
+                } else if (idx === selectedIdx && !opt.isCorrect) {
+                    // Đáp án học sinh chọn sai sáng màu đỏ
+                    btn.className = 'text-left p-3.5 rounded-xl border-2 border-rose-500 bg-rose-50 flex items-start gap-3';
+                    letter.className = 'w-7 h-7 rounded-lg bg-rose-600 text-white font-extrabold text-sm flex items-center justify-center shrink-0';
+                    letter.textContent = '✗';
+                } else {
+                    btn.className = 'text-left p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 opacity-60 flex items-start gap-3';
+                }
+            });
+
+            // Hiển thị lời giải chi tiết ngay bên dưới
+            const correctIdx = questionObj.shuffledOptions.findIndex(o => o.isCorrect);
+            const reactionText = isCorrect
+                ? funCorrectMessages[Math.floor(Math.random() * funCorrectMessages.length)]
+                : funWrongMessages[Math.floor(Math.random() * funWrongMessages.length)];
+
+            feedbackBox.classList.remove('hidden');
+            if (isCorrect) {
+                feedbackBox.className = 'mt-4 p-4 rounded-xl border-2 border-emerald-200 bg-emerald-50/70 text-emerald-950 text-sm leading-relaxed';
+                feedbackBox.innerHTML = `
+                    <div class="font-extrabold text-emerald-800 mb-1">🎉 ${reactionText}</div>
+                    <div><b>💡 Giải thích:</b> ${questionObj.explanation}</div>
+                `;
+            } else {
+                feedbackBox.className = 'mt-4 p-4 rounded-xl border-2 border-rose-200 bg-rose-50/80 text-rose-950 text-sm leading-relaxed';
+                feedbackBox.innerHTML = `
+                    <div class="font-extrabold text-rose-800 mb-1">🤪 ${reactionText} (Đáp án đúng là <b>${optionLetters[correctIdx]}</b>)</div>
+                    <div><b>💡 Giải thích:</b> ${questionObj.explanation}</div>
+                `;
+            }
+
+            updateHeaderUI();
+
+            // Kiểm tra xem đã làm hết tất cả các câu hỏi trong cấp độ hiện tại chưa
+            if (Object.keys(userAnswers).length === activeQuestions.length) {
+                handleLevelCompleted();
+            }
+        }
+
+        /********************************************************************
+         * 6. XỬ LÝ KHI HOÀN THÀNH HẾT CÂU HỎI TRONG CẤP ĐỘ
+         ********************************************************************/
+        function handleLevelCompleted() {
+            const total = activeQuestions.length;
+            let correctCount = 0;
+            activeQuestions.forEach(q => {
+                const chosenIdx = userAnswers[q.id];
+                if (chosenIdx !== undefined && q.shuffledOptions[chosenIdx]?.isCorrect) {
+                    correctCount++;
+                }
+            });
+
+            const isPerfect = correctCount === total;
+            let summaryHTML = '';
+
+            if (currentLevel === 1) {
+                if (isPerfect) {
+                    level1PerfectCount++;
+                    saveProgress();
+                    playSoundLevelUp();
+                    launchConfetti();
+
+                    if (level1PerfectCount < 3) {
+                        summaryHTML = `
+                            <div class="text-4xl mb-2">🌟🎯🌟</div>
+                            <h3 class="text-xl font-extrabold text-emerald-700">Xuất sắc! Em đạt tuyệt đối 12/12 câu Cấp độ 1!</h3>
+                            <p class="text-slate-700 mt-1 text-sm sm:text-base">
+                                Tiến độ mở khóa của em: <strong class="text-amber-600 text-lg">${level1PerfectCount}/3 lần</strong> đạt 12/12 câu.
+                                Chỉ cần làm đúng 12/12 thêm <b>${3 - level1PerfectCount} lần nữa</b> là mở khóa Cấp độ 2 và 3!
+                            </p>
+                            <div class="mt-4 flex flex-wrap justify-center gap-3">
+                                <button onclick="restartCurrentLevel()" class="px-5 py-3 rounded-xl font-extrabold bg-blue-600 hover:bg-blue-700 text-white shadow-md transition">
+                                    🔀 Đảo đề & Làm tiếp Lần ${level1PerfectCount + 1} ngay!
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        summaryHTML = `
+                            <div class="text-4xl mb-2">🏆🔓🎉</div>
+                            <h3 class="text-xl font-extrabold text-emerald-700">CHÚC MỪNG! ĐÃ ĐẠT ĐỦ ${level1PerfectCount}/3 LẦN 12/12 CÂU!</h3>
+                            <p class="text-slate-700 mt-1 text-sm sm:text-base">
+                                Em đã thuộc làu toàn bộ công thức và lý thuyết Cấp độ 1. <b>Cấp độ 2 (7-8 điểm)</b> và <b>Cấp độ 3 (9-10 điểm)</b> đã chính thức mở khóa!
+                            </p>
+                            <div class="mt-4 flex flex-wrap justify-center gap-3">
+                                <button onclick="selectLevel(2)" class="px-5 py-3 rounded-xl font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition">
+                                    ⚡ Chinh phục ngay Cấp độ 2 (7-8đ) →
+                                </button>
+                                <button onclick="restartCurrentLevel()" class="px-4 py-3 rounded-xl font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+                                    🔄 Luyện thêm Cấp độ 1
+                                </button>
+                            </div>
+                        `;
+                    }
+                } else {
+                    summaryHTML = `
+                        <div class="text-4xl mb-2">💪📚</div>
+                        <h3 class="text-xl font-extrabold text-rose-700">Em đạt ${correctCount}/12 câu đúng ở lượt này!</h3>
+                        <p class="text-slate-700 mt-1 text-sm sm:text-base">
+                            Để được tính 1 ngôi sao mở khóa, em cần đạt <b>tuyệt đối 12/12 câu đúng</b>. Hãy đọc kĩ lời giải các câu màu đỏ và bấm <b>Đảo đề & Làm lại</b> nhé! (Hiện tại: <b>${level1PerfectCount}/3 lần</b> đạt 12/12).
+                        </p>
+                        <div class="mt-4 flex flex-wrap justify-center gap-3">
+                            <button onclick="restartCurrentLevel()" class="px-5 py-3 rounded-xl font-extrabold bg-blue-600 hover:bg-blue-700 text-white shadow-md transition">
+                                🔀 Đảo câu hỏi & Làm lại để đạt 12/12!
+                            </button>
+                        </div>
+                    `;
+                }
+            } else {
+                // Cấp độ 2 hoặc 3
+                if (isPerfect) {
+                    playSoundLevelUp();
+                    launchConfetti();
+                }
+                summaryHTML = `
+                    <div class="text-4xl mb-2">${isPerfect ? '🏆🔥' : '⚡📝'}</div>
+                    <h3 class="text-xl font-extrabold ${isPerfect ? 'text-emerald-700' : 'text-indigo-700'}">
+                        Hoàn thành Cấp độ ${currentLevel}: Đúng ${correctCount}/${total} câu!
+                    </h3>
+                    <p class="text-slate-700 mt-1 text-sm sm:text-base">
+                        ${isPerfect
+                            ? 'Quá đỉnh! Em đã nắm vững toàn bộ dạng bài tập ở cấp độ này!'
+                            : 'Hãy xem lại giải thích chi tiết các câu sai và thử làm lại với đề đảo ngẫu nhiên nhé!'}
+                    </p>
+                    <div class="mt-4 flex flex-wrap justify-center gap-3">
+                        <button onclick="restartCurrentLevel()" class="px-5 py-3 rounded-xl font-extrabold bg-blue-600 hover:bg-blue-700 text-white shadow-md transition">
+                            🔀 Đảo đề & Làm lại Cấp độ ${currentLevel}
+                        </button>
+                        ${currentLevel === 2 ? `
+                            <button onclick="selectLevel(3)" class="px-5 py-3 rounded-xl font-extrabold bg-purple-600 hover:bg-purple-700 text-white shadow-md transition">
+                                🔥 Sang Cấp độ 3 (9-10 điểm) →
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            updateHeaderUI();
+            updateBannerUI();
+
+            const topBox = document.getElementById('level-summary-box');
+            const bottomBox = document.getElementById('level-summary-bottom');
+            topBox.innerHTML = summaryHTML;
+            bottomBox.innerHTML = summaryHTML;
+            topBox.classList.remove('hidden');
+            bottomBox.classList.remove('hidden');
+
+            bottomBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        /********************************************************************
+         * 7. HIỆU ỨNG PHÁO HOA CHÚC MỪNG (CONFETTI CANVAS)
+         ********************************************************************/
+        function launchConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = Array.from({ length: 85 }, () => ({
+                x: Math.random() * canvas.width,
+                y: -20 - Math.random() * 100,
+                size: 6 + Math.random() * 6,
+                color: ['#2563eb', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'][Math.floor(Math.random() * 5)],
+                speedY: 3 + Math.random() * 4,
+                speedX: -2 + Math.random() * 4,
+                angle: Math.random() * 360,
+                spin: -5 + Math.random() * 10
+            }));
+
+            let frame = 0;
+            function animate() {
+                frame++;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.y += p.speedY;
+                    p.x += p.speedX;
+                    p.angle += p.spin;
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.angle * Math.PI) / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+                    ctx.restore();
+                });
+                if (frame < 130) {
+                    requestAnimationFrame(animate);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+            animate();
+        }
+
+        // Khởi chạy ứng dụng khi tải trang
+        window.onload = function () {
+            loadProgress();
+            startLevelSession(1);
+        };
+    </script>
+</body>
+</html>
